@@ -30,7 +30,7 @@ def registration_auth(request):
 
             return Response(token)
         else:
-            AuthenticationFailed(code=403, detail='User already exists')
+            raise AuthenticationFailed(code=403, detail='User already exists')
     else:
         raise AuthenticationFailed(code=403, detail='Bad data regestration')
     
