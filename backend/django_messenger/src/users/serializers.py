@@ -27,10 +27,13 @@ class LoginAuth(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-
 class UserSerializer(serializers.ModelSerializer):
     #получение данных пользователя
     class Meta:
         model = models.User
         fields = ('id', 'username', 'email', 'last_name', 'phone_number')
+
+class TokenSerializer(serializers.Serializer):
+    #получение токена
+    token = serializers.CharField()
 

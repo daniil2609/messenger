@@ -5,7 +5,7 @@ import jwt
 from django.conf import settings
 from rest_framework import authentication, exceptions
 
-from src.users.models import User
+from src.users.models import User, BlackListToken
 
 
 class AuthBackend(authentication.BaseAuthentication):
@@ -47,5 +47,9 @@ class AuthBackend(authentication.BaseAuthentication):
             user = User.objects.get(id=payload['user_id'])
         except User.DoesNotExist:
             raise exceptions.AuthenticationFailed('No user matching this token was found.')
+        
+        bad_token = BlackListToken.objects.filter(token=token).first()
+        if bad_token is not None:
+            raise exceptions.AuthenticationFailed('Invalid token')
 
         return user, None

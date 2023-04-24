@@ -24,3 +24,6 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+class BlackListToken(models.Model):
+    token = models.CharField(max_length=200)
