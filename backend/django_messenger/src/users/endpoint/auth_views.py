@@ -19,7 +19,13 @@ def registration_auth(request):
                         username=registration_data.validated_data['username'],
                         email=registration_data.validated_data['email'],
                         password=registration_data.validated_data['password'])
-            token = creating_token.create_token(user.id)
+            
+            while True:
+                token = creating_token.create_token(user.id)
+                bad_token = BlackListToken.objects.filter(token=token['access_token']).first()
+                if bad_token is None:
+                    break
+
             return Response(token)
         else:
             AuthenticationFailed(code=403, detail='User already exists')
@@ -45,7 +51,12 @@ def login_auth(request):
         if not user.check_password(password):
             raise AuthenticationFailed(code=403, detail='Incorrect password!')
         
-        token = creating_token.create_token(user.id)
+        while True:
+            token = creating_token.create_token(user.id)
+            bad_token = BlackListToken.objects.filter(token=token['access_token']).first()
+            if bad_token is None:
+                break
+
         return Response(token)
     else:
         raise AuthenticationFailed(code=403, detail='Bad data login')

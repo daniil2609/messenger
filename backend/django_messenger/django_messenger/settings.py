@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     'src.users',
+    'src.chat',
 ]
 
 MIDDLEWARE = [
@@ -138,6 +139,7 @@ EMAIL_USE_SSL = True
 #Token config
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+
 
 
 REST_FRAMEWORK = {
