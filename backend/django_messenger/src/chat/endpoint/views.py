@@ -17,6 +17,7 @@ class UserFriendsView(APIView):
         """
         Return a list friends.
         """
+        print(request.user.pk)
         #user = UserSerializer
         #friends_user = Friend.objects.friends(user) # список всех друзей
 

@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = models.User
         fields = ('id', 'username', 'email', 'last_name', 'phone_number')
 
+
 class TokenSerializer(serializers.Serializer):
     #получение токена
     token = serializers.CharField()
