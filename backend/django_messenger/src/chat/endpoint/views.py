@@ -11,7 +11,7 @@ from src.users.serializers import UserSerializer
 class UserFriendsView(APIView):
     """ Просмотр и редактирование друзей пользователя
     """
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         """
@@ -21,5 +21,6 @@ class UserFriendsView(APIView):
         #user = UserSerializer
         #friends_user = Friend.objects.friends(user) # список всех друзей
 
-        return Response('')
+        return Response({"user": request.user.pk,
+                         "userauth": request.user.is_authenticated})
 
