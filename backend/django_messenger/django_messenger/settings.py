@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     'src.users',
     'src.chat',
+    'src.friends',
 ]
 
 MIDDLEWARE = [
@@ -170,3 +171,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/login'
+ERROR_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'

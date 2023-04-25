@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import User
-from . import models
 
 class RegistrationAuth(serializers.ModelSerializer):
     """ Сериализация данных от Регистрации
@@ -30,8 +29,8 @@ class LoginAuth(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     #получение данных пользователя
     class Meta:
-        model = models.User
-        fields = ('id', 'username', 'email', 'last_name', 'phone_number')
+        model = User
+        fields = ('id', 'username', 'email', 'last_name', 'phone_number', 'email_verify')
 
 
 class TokenSerializer(serializers.Serializer):

@@ -1,9 +1,10 @@
-from django.urls import path
-from django.views.generic import TemplateView
-from .endpoint import views
+from .views import *
+from django.urls import path, include
+
+
 
 urlpatterns = [
-    path('', views.UserFriendsView.as_view(), name='home'),
+    #path('me/friends/', UserFriendsView.as_view()),
     #path('chat/', HomeUser.as_view(), name='home_chat'),
     #path('profile_edit/', ProfileEditView.as_view(), name='profile_edit'),
 
