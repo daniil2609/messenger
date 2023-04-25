@@ -23,7 +23,7 @@ class User(AbstractUser):
     phone_number = models.CharField(validators=[RegexValidator(regex = r"^\+?1?\d{8,15}$")], max_length=16, unique=True, null=True, blank=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']
 
 class BlackListToken(models.Model):
     token = models.CharField(max_length=200)

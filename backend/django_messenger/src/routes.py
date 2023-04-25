@@ -17,4 +17,5 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('auth/', include('src.users.urls')),
     path('chat/', include('src.chat.urls')),
+    path('friend/', include('src.friends.urls')),
 ]
