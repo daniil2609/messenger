@@ -6,7 +6,7 @@ from friendship.models import FriendshipRequest
 class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'last_name', 'phone_number')
 
 
 class FriendshipRequestSerializer(serializers.ModelSerializer):
@@ -31,6 +31,10 @@ class FriendshipRequestResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendshipRequest
         fields = ('id',)
+
+
+class FriendSearchSerializer(serializers.Serializer):
+    message = serializers.CharField(max_length = 100)
 
 
 

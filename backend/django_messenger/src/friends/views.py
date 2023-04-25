@@ -1,18 +1,17 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from django.utils.module_loading import import_string
 from rest_framework import status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from friendship.models import Friend, FriendshipRequest
 from friendship.exceptions import AlreadyExistsError, AlreadyFriendsError
-from .serializers import FriendshipRequestSerializer, FriendSerializer, FriendshipRequestResponseSerializer
+from .serializers import *
+from django.db.models import Q
 
 User = get_user_model()
 
 
-class FriendViewSet(viewsets.ModelViewSet):
+class FriendViewSet(viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FriendSerializer
     lookup_field = 'pk'
@@ -29,20 +28,14 @@ class FriendViewSet(viewsets.ModelViewSet):
         '''
         friend_requests = Friend.objects.friends(user=request.user)
         self.queryset = friend_requests
-        self.http_method_names = ['get', 'head', 'options', ]
+        self.http_method_names = ['get']
         return Response(FriendSerializer(friend_requests, many=True).data)
 
+
     def retrieve(self, request, pk=None):
-        self.queryset = Friend.objects.friends(user=request.user)
-        requested_user = get_object_or_404(User, pk=pk)
-        if Friend.objects.are_friends(request.user, requested_user):
-            self.http_method_names = ['get', 'head', 'options', ]
-            return Response(FriendSerializer(requested_user, many=False).data)
-        else:
-            return Response(
-                {'message': "Friend relationship not found for user."},
-                status.HTTP_400_BAD_REQUEST
-            )
+        response = {'message': 'This function is not serviced.'}
+        return Response(response, status=status.HTTP_403_FORBIDDEN)
+
 
     @ action(detail=False)
     def requests(self, request):
@@ -83,9 +76,6 @@ class FriendViewSet(viewsets.ModelViewSet):
         - to_user (email)
         - message
         """
-        # Creates a friend request from POST data:
-        # - username
-        # - message
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         to_user = get_object_or_404(
@@ -127,16 +117,10 @@ class FriendViewSet(viewsets.ModelViewSet):
         )
 
         if Friend.objects.remove_friend(request.user, to_user):
-            message = 'Friend deleted.'
-            status_code = status.HTTP_204_NO_CONTENT
+            return Response({"message": 'Friend deleted.'}, status.HTTP_201_CREATED)
         else:
-            message = 'Friend not found.'
-            status_code = status.HTTP_400_BAD_REQUEST
+            return Response({"message": 'Friend not found.'}, status.HTTP_400_BAD_REQUEST)
 
-        return Response(
-            {"message": message},
-            status=status_code
-        )
 
     @ action(detail=False,
              serializer_class=FriendshipRequestResponseSerializer,
@@ -185,3 +169,18 @@ class FriendViewSet(viewsets.ModelViewSet):
             },
             status.HTTP_201_CREATED
         )
+    
+    @ action(detail=False,
+             serializer_class=FriendSearchSerializer,
+             methods=['post'])
+    def search_friends(self, request, id=None):
+        """
+        Ищет в базе пользователей по запросу (для дальнейшего добавления в друзья)
+        Возвращает список из 10(max) подходящих записей
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message=serializer.validated_data.get('message')
+        search_results = User.objects.filter(Q(email__icontains=message) | Q(username__icontains=message)).exclude(pk=request.user.pk)[:10]
+        return Response(FriendSerializer(search_results, many=True).data)
+
