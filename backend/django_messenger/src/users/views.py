@@ -1,21 +1,19 @@
 from rest_framework import viewsets, parsers, permissions
 from . import serializers
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from .models import User, BlackListToken
-from .services import creating_token, send_email_verify
-from . import serializers
-from rest_framework import authentication
+from .models import User
+from . import send_email_verify
 from rest_framework import status
 from django.views import View
 from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth.tokens import default_token_generator as \
-    token_generator
-from django.shortcuts import render, redirect
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import redirect
 from django.core.exceptions import ValidationError
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.conf import settings
+from django.http import JsonResponse
+
 
 @api_view(["POST"])
 def registration_auth(request):
@@ -32,73 +30,32 @@ def registration_auth(request):
             send_email_verify.send_email_for_verify(request, user)
             return Response({'detail': 'Regestration successfully, confirm email'}, status=status.HTTP_201_CREATED)
         else:
-            raise AuthenticationFailed(code=403, detail='User already exists')
+            return Response({'detail': 'User already exists'}, status=status.HTTP_403_FORBIDDEN)
     else:
-        raise AuthenticationFailed(code=403, detail='Bad data regestration')
+        return Response({'detail': 'Bad data regestration'}, status=status.HTTP_403_FORBIDDEN)
     
 @api_view(["POST"])
-def login_auth(request):
-    """ Вход пользователя
-    """
+def login_view(request):
     login_data = serializers.LoginAuth(data=request.data)
     if login_data.is_valid():
         email=login_data.validated_data['email']
         password=login_data.validated_data['password']
         user = User.objects.filter(email=email).first()
-
-        if user is None:
-            raise AuthenticationFailed('User not found!')
-        
-        if user.email_verify == False:
-            raise AuthenticationFailed('User email was not confirmed')
-        
-        if not user.check_password(password):
-            raise AuthenticationFailed(code=403, detail='Incorrect password!')
-        
-        while True:
-            token = creating_token.create_token(user.id)
-            bad_token = BlackListToken.objects.filter(token=token['access_token']).first()
-            if bad_token is None:
-                break
-
-        return Response(token)
-    else:
-        raise AuthenticationFailed(code=403, detail='Bad data login')
-
-
-class EmailVerify(View):
-    def get(self, request, uidb64, token):
-        user = self.get_user(uidb64)
-
-        if user is not None and token_generator.check_token(user, token):
-            user.email_verify = True
-            user.save()
-            return redirect(settings.SUCCEFULLY_EMAIL_VERIFY_REDIRECT)
-        return redirect(settings.ERROR_EMAIL_VERIFY_REDIRECT)
-
-    @staticmethod
-    def get_user(uidb64):
-        try:
-            # urlsafe_base64_decode() decodes to bytestring
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = get_user_model().objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError,
-                get_user_model().DoesNotExist, ValidationError):
-            user = None
-        return user
+    if email is None or password is None:
+        return Response({'detail': 'Please provide username and password.'}, status=status.HTTP_400_BAD_REQUEST)
+    user = authenticate(email=email, password=password)
+    if user is None:
+        return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_400_BAD_REQUEST)
+    login(request, user)
+    return Response({'detail': 'Successfully logged in.'}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
-def logout_auth(request):
-    """ Выход пользователя(токен в заголовке)
-    """
-    try:
-        logout_data = authentication.get_authorization_header(request).split()
-        token = logout_data[1].decode('UTF-8')
-        BlackListToken.objects.create(token=token)
-        return Response({'detail': 'Logout successfully'}, status=status.HTTP_201_CREATED)
-    except:
-        return Response({'detail': 'Logout error'}, status=status.HTTP_400_BAD_REQUEST)
+def logout_view(request):
+    if not request.user.is_authenticated:
+        return Response({'detail': 'You\'re not logged in.'}, status=status.HTTP_400_BAD_REQUEST)
+    logout(request)
+    return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
 
 
 class UserView(viewsets.ModelViewSet):
@@ -120,14 +77,9 @@ class UserView(viewsets.ModelViewSet):
             last_email.email = email
             serializer.validated_data['email_verify'] = False
             send_email_verify.send_email_for_verify(request, last_email)
-
         self.perform_update(serializer)
-
         if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
-
         return Response(serializer.data)
 
     def get_queryset(self):
@@ -136,3 +88,30 @@ class UserView(viewsets.ModelViewSet):
     def get_object(self):
         return self.get_queryset()
     
+
+class EmailVerify(View):
+    def get(self, request, uidb64, token):
+        user = self.get_user(uidb64)
+
+        if user is not None and default_token_generator.check_token(user, token):
+            user.email_verify = True
+            user.save()
+            return redirect(settings.SUCCEFULLY_EMAIL_VERIFY_REDIRECT)
+        return redirect(settings.ERROR_EMAIL_VERIFY_REDIRECT)
+
+    @staticmethod
+    def get_user(uidb64):
+        try:
+            # urlsafe_base64_decode() decodes to bytestring
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = get_user_model().objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError,
+                get_user_model().DoesNotExist, ValidationError):
+            user = None
+        return user 
+
+@api_view(["GET"])
+def session_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'isAuthenticated': False})
+    return JsonResponse({'isAuthenticated': True})
