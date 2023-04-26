@@ -15,7 +15,7 @@ class RegistrationAuth(serializers.ModelSerializer):
         }
 
 class LoginAuth(serializers.ModelSerializer):
-    """ Сериализация данных от Регистрации
+    """ Сериализация данных от Входа
     """
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -31,9 +31,4 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'last_name', 'phone_number', 'email_verify')
-
-
-class TokenSerializer(serializers.Serializer):
-    #получение токена
-    token = serializers.CharField()
 

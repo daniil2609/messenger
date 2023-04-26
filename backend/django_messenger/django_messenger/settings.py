@@ -21,7 +21,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -31,10 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'rest_framework',
-    'corsheaders',
-    'friendship',
-    'drf_yasg',
     'django_filters',
+    'corsheaders',
+    'drf_yasg',
+    'friendship',
 
     'src.users',
     'src.chat',
@@ -120,14 +119,13 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
+#настройка пользовательской модели по умолчанию
 AUTH_USER_MODEL = 'users.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#send_email
+#настройки отправки email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 '''
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
@@ -137,14 +135,11 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 '''
 
-#Token config
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
-
-
-
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('src.users.services.auth_backend.AuthBackend',),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny'
     ],
@@ -154,14 +149,11 @@ REST_FRAMEWORK = {
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
+        'basic': {
+            'type': 'basic'
         }
     }
 }
-
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
@@ -172,5 +164,15 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+#перенаправление после подтверждения email
 SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/login'
 ERROR_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'
+
+#настройки передачи csrf токенов (подходит для сессионной аутентификации)
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
+SESSION_COOKIE_HTTPONLY = True
+# PROD ONLY
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
