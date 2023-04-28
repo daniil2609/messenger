@@ -1,18 +1,24 @@
-FROM python:3.9.6-alpine
+# Стартовый образ
+FROM python:3.11-alpine
 
-# set work directory
-WORKDIR /project
+# рабочая директория
+WORKDIR /usr/src/app
+RUN mkdir -p $WORKDIR/static
+RUN mkdir -p $WORKDIR/media
 
-# set environment variables
+# переменные окружения для python
+#не создавать файлы кэша .pyc
 ENV PYTHONDONTWRITEBYTECODE 1
+# не помещать в буфер потоки stdout и stderr
 ENV PYTHONUNBUFFERED 1
 
-# install dependencies
+# обновим pip
 RUN pip install --upgrade pip
-COPY ./backend/requirements.txt /project/backend/requirements.txt
-RUN pip install -r /project/backend/requirements.txt
 
-# copy project
-COPY . /project
+# скопируем и установим зависимости. эта операция закешируется 
+# и будет перезапускаться только при изменении requirements.txt
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
 
-EXPOSE 8000
+# копируем всё что осталось.
+COPY . .

@@ -113,5 +113,5 @@ class EmailVerify(View):
 @api_view(["GET"])
 def session_view(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'isAuthenticated': False})
-    return JsonResponse({'isAuthenticated': True})
+        return Response({'isAuthenticated: False'}, status=status.HTTP_200_OK)
+    return Response({'isAuthenticated: True'}, status=status.HTTP_200_OK)
