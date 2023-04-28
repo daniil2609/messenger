@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
     'friendship',
+    'frontend',
 
     'src.users',
     'src.chat',
@@ -51,12 +52,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'django_messenger.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'frontend/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'django_messenger.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database

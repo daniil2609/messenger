@@ -30,5 +30,5 @@ class UserSerializer(serializers.ModelSerializer):
     #получение данных пользователя
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'last_name', 'phone_number', 'email_verify')
+        fields = ('id', 'username', 'email', 'last_name', 'phone_number')
 
