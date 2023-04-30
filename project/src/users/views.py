@@ -36,6 +36,8 @@ def registration_auth(request):
     
 @api_view(["POST"])
 def login_view(request):
+    """ Вход пользователя
+    """
     login_data = serializers.LoginAuth(data=request.data)
     if login_data.is_valid():
         email=login_data.validated_data['email']
@@ -52,6 +54,8 @@ def login_view(request):
 
 @api_view(["POST"])
 def logout_view(request):
+    """ Выход пользователя
+    """
     if not request.user.is_authenticated:
         return Response({'detail': 'You\'re not logged in.'}, status=status.HTTP_400_BAD_REQUEST)
     logout(request)
@@ -112,6 +116,8 @@ class EmailVerify(View):
 
 @api_view(["GET"])
 def session_view(request):
+    """ Получить информацию о аунтетификации пользователя
+    """
     if not request.user.is_authenticated:
         return Response({'isAuthenticated: False'}, status=status.HTTP_200_OK)
     return Response({'isAuthenticated: True'}, status=status.HTTP_200_OK)
