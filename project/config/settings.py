@@ -17,11 +17,12 @@ DEBUG = True
 #DEBUG = int(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = []
-#ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+#ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -71,8 +72,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
-
+'''
 # Database
 DATABASES = {
     'default': {
@@ -80,6 +82,29 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+'''
+DATABASES = {
+    "default": {
+        "ENGINE": os.environ.get("PG_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("PG_NAME", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("PG_USER", "user"),
+        "PASSWORD": os.environ.get("PG_PASSWORD", "password"),
+        "HOST": os.environ.get("PG_HOST", "localhost"),
+        "PORT": os.environ.get("PG_PORT", "5432"),
+    }
+}
+'''
+DATABASES = {
+    "default": {
+        "ENGINE": 'django.db.backends.postgresql',
+        "NAME": 'db_messenger',
+        "USER": 'admin',
+        "PASSWORD": '12345',
+        "HOST": '127.0.0.1',
+        "PORT": '5432',
+    }
+}
+'''
 
 
 # Password validation
@@ -117,6 +142,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+STATIC_ROOT = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -166,7 +192,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 #перенаправление после подтверждения email
-SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/login'
+SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'
 ERROR_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'
 
 #настройки передачи csrf токенов (подходит для сессионной аутентификации)
@@ -177,3 +203,17 @@ SESSION_COOKIE_HTTPONLY = True
 # PROD ONLY
 # CSRF_COOKIE_SECURE = True
 # SESSION_COOKIE_SECURE = True
+
+
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
+}
+

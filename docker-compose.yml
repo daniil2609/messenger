@@ -1,11 +1,54 @@
-version: '3.8'
+version: '3'
+
 services:
-  web:
-    build: .
-    command: python /project/backend/django_messenger/manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/project
-    ports:
-      - 8000:8000
-    env_file:
-      - ./.env.dev
+    redis:
+        image: redis:alpine
+        #volumes:
+        #    - ./redis.conf:/usr/local/etc/redis/redis.conf
+        #ports:
+        #    - '6379:6379'
+        #command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+        #env_file:
+        #    - '.env'
+
+    postgres_db:
+        image: 'postgres'
+        environment:
+            - POSTGRES_USER=${PG_USER}
+            - POSTGRES_PASSWORD=${PG_PASSWORD}
+            - POSTGRES_DB=${PG_NAME}
+        ports:
+            - '5432:5432'
+        env_file:
+            - '.env'
+
+    web:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        environment:
+            - REDIS_HOST=redis
+        volumes:
+            - ./:/core
+            - ./media/:/media
+            - ./static/:/static
+        depends_on:
+            - postgres_db
+            - redis
+        ports:
+            - "8000:8000"
+        entrypoint: [ "/core/entrypoint.sh" ]
+        env_file:
+            - '.env'
+
+    nodejs:
+        build:
+            context: ./
+            dockerfile: Dockerfile_react_dev
+        container_name: nodejs
+        env_file: .env
+        volumes:
+            - ./:/core
+            - ./static/:/static
+        environment:
+            - WATCHPACK_POLLING=true

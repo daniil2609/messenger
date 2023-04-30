@@ -1,24 +1,26 @@
-# Стартовый образ
-FROM python:3.11-alpine
+FROM python:3.9
 
-# рабочая директория
-WORKDIR /usr/src/app
-RUN mkdir -p $WORKDIR/static
-RUN mkdir -p $WORKDIR/media
-
-# переменные окружения для python
-#не создавать файлы кэша .pyc
 ENV PYTHONDONTWRITEBYTECODE 1
-# не помещать в буфер потоки stdout и stderr
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBEFFERED 1
 
-# обновим pip
+RUN apt-get update && apt-get upgrade -y && apt-get install -y build-essential daphne
+
+RUN apt-get install -y tzdata
+ENV TZ Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN mkdir /core
+
+WORKDIR /core
+
+# COPY groups.json .
+COPY requirements.txt .
+COPY entrypoint.sh .
 RUN pip install --upgrade pip
+RUN pip install -r requirements.txt --default-timeout=100 future
+RUN chmod +x entrypoint.sh
 
-# скопируем и установим зависимости. эта операция закешируется 
-# и будет перезапускаться только при изменении requirements.txt
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt
-
-# копируем всё что осталось.
 COPY . .
+
+
+# ENTRYPOINT ["/core/entrypoint.sh"]

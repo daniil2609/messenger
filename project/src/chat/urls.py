@@ -11,4 +11,8 @@ urlpatterns = [
     #dj channels:
     #path('test/', index, name='index'),
     #path('test/<str:room_name>/', room, name='room'),
+    
+    #dj channels:
+    path('test/', index, name='index'),
+    path('test/<str:room_name>/', room, name='room'),
 ]
