@@ -30,8 +30,8 @@ services:
             - REDIS_HOST=redis
         volumes:
             - ./:/core
-            - ./media/:/media
-            - ./static/:/static
+            - ./project/media/:/media
+            - ./project/static/:/static
         depends_on:
             - postgres_db
             - redis
@@ -49,6 +49,8 @@ services:
         env_file: .env
         volumes:
             - ./:/core
-            - ./static/:/static
+            - ./project/static/:/static
         environment:
             - WATCHPACK_POLLING=true
+        depends_on:
+            - web
