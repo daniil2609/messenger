@@ -1,18 +1,6 @@
 const path = require("path");
 
 module.exports = {
-    entry: "./src/index.js",
-    mode: "development",
-    output: {
-        filename: "main.js"
-    },
-    devServer: {
-        static: {
-          directory: path.join(__dirname, "dist")
-        },
-        compress: true,
-        port: 9000,
-      },
     module: {
         rules: [
             {
@@ -24,6 +12,13 @@ module.exports = {
                         "@babel/preset-env", "@babel/preset-react"
                     ]
                 }
+            },
+            {
+                test: /\.css$/,
+                use: [
+                  'style-loader',
+                  'css-loader'
+                ]
             }
         ]
     }
