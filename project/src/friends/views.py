@@ -7,9 +7,10 @@ from friendship.models import Friend, FriendshipRequest
 from friendship.exceptions import AlreadyExistsError, AlreadyFriendsError
 from .serializers import *
 from django.db.models import Q
+from src.users.models import User
+from src.chat.models import Room, Message
 
 User = get_user_model()
-
 
 class FriendViewSet(viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -117,6 +118,10 @@ class FriendViewSet(viewsets.GenericViewSet):
         )
 
         if Friend.objects.remove_friend(request.user, to_user):
+            #удаляем комнату чата
+            #room = Room.objects.filter(Q(name='_'+str(request.user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(request.user.pk)+'_') 
+            #                           | Q(name='_'+str(to_user.pk)+'_'+str(request.user.pk)+'_'+str(request.user.pk)+'_'+str(to_user.pk)+'_')).first()
+            #room.delete()
             return Response({"message": 'Friend deleted.'}, status.HTTP_201_CREATED)
         else:
             return Response({"message": 'Friend not found.'}, status.HTTP_400_BAD_REQUEST)
@@ -139,8 +144,18 @@ class FriendViewSet(viewsets.GenericViewSet):
                 {"message": "Request for current user not found."},
                 status.HTTP_400_BAD_REQUEST
             )
-
+        #добавляем для друзей чат комнату
+        to_user = get_object_or_404(User, email=friendship_request.to_user)
+        user = get_object_or_404(User, email=friendship_request.from_user)
+        room = Room.objects.create(
+            name = '_'+str(user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(user.pk)+'_',
+            type = 1
+        )
+        room.participant.add(user)
+        room.participant.add(to_user)
+        room.save()
         friendship_request.accept()
+
         return Response(
             {"message": "Request accepted, user added to friends."},
             status.HTTP_201_CREATED
@@ -173,7 +188,7 @@ class FriendViewSet(viewsets.GenericViewSet):
     @ action(detail=False,
              serializer_class=FriendSearchSerializer,
              methods=['post'])
-    def search_friends(self, request, id=None):
+    def search_friends(self, request):
         """
         Ищет в базе пользователей по запросу (для дальнейшего добавления в друзья)
         Возвращает список из 10(max) подходящих записей
