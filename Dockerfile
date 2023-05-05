@@ -17,7 +17,7 @@ WORKDIR /core
 COPY requirements.txt .
 COPY entrypoint.sh .
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt --default-timeout=100 future
+RUN pip install -r requirements.txt
 RUN chmod +x entrypoint.sh
 
 COPY . .
