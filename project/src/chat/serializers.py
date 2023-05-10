@@ -5,11 +5,11 @@ from .models import Room, Message
 
 
 class RoomSerializer(serializers.ModelSerializer):
-    chat_name = serializers.ReadOnlyField(source='get_name')
+    #chat_name = serializers.ReadOnlyField(source='get_name')
     
     class Meta:
         model = Room
-        fields = ('id', 'chat_name', 'name', 'participant', 'type')
+        fields = ('id', 'display_name', 'name', 'participant', 'type')
 
 #class MessageSerializer(serializers.ModelSerializer):
 #    class Meta:

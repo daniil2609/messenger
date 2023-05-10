@@ -17,16 +17,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = 'chat_%s' % self.room_name
-        self.user = self.scope['user']
-
-        if self.scope['room_type'] == '1':
-            Room = Room.objects.filter(name=self.room_name)
-            if Room is None:
-                Room = Room.objects.create(name = self.room_name, type = 1)
-                Room.participant.add(self.user, User.objects.get(pk=self.scope.to_user))
-                Room.save()
-                self.room = Room
-            print(self.room.type)
 
 
         # Join room group
