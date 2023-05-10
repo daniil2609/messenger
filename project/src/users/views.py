@@ -48,6 +48,8 @@ def login_view(request):
     user = authenticate(email=email, password=password)
     if user is None:
         return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_400_BAD_REQUEST)
+    if user.email_verify == False:
+        return Response({'detail': 'Email not confirmed.'}, status=status.HTTP_400_BAD_REQUEST)
     login(request, user)
     return Response({'detail': 'Successfully logged in.'}, status=status.HTTP_200_OK)
 
