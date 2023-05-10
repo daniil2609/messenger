@@ -38,7 +38,8 @@ const Authorization = () => {
         axios.post("http://127.0.0.1:8000/api/v1/auth/login/", formData, {
                 headers: {
                     'X-CSRFToken': csrfToken
-                }
+                },
+                withCredentials: true
             })
             .then(responce => {
                 if (responce.data.detail = "Successfully logged in."){

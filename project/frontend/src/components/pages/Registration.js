@@ -37,7 +37,8 @@ const Registration = () => {
     axios.post("http://127.0.0.1:8000/api/v1/auth/register/", formData, {
             headers: {
                 'X-CSRFToken': csrfToken
-            }
+            },
+            withCredentials: true
         })
         .then(responce => {
             console.log(responce.data.detail)
