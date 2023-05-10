@@ -147,19 +147,23 @@ class FriendViewSet(viewsets.GenericViewSet):
         #добавляем для друзей чат комнату
         to_user = get_object_or_404(User, email=friendship_request.to_user)
         user = get_object_or_404(User, email=friendship_request.from_user)
-        room = Room.objects.create(
-            name = '_'+str(user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(user.pk)+'_',
-            type = 1
-        )
-        room.participant.add(user)
-        room.participant.add(to_user)
-        room.save()
+        #если комната уже существует (пользователь ранее ее удалил) то добавляем его обратно
+        room = Room.objects.filter(Q(name='_'+str(user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(user.pk)+'_') | Q(name='_'+str(to_user.pk)+'_'+str(user.pk)+'_'+str(user.pk)+'_'+str(to_user.pk)+'_')).first()
+        if room is not None:
+            room.participant.add(user)
+            room.save()
+        #если не существует то создаем новую комнату
+        else:
+            room = Room.objects.create(
+                name = '_'+str(user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(user.pk)+'_',
+                type = 1,
+                display_name = str(user.username)+'_'+str(to_user.username)
+            )
+            room.participant.add(user)
+            room.participant.add(to_user)
+            room.save()
         friendship_request.accept()
-
-        return Response(
-            {"message": "Request accepted, user added to friends."},
-            status.HTTP_201_CREATED
-        )
+        return Response({"message": "Request accepted, user added to friends."}, status.HTTP_201_CREATED)
 
     @ action(detail=False,
              serializer_class=FriendshipRequestResponseSerializer,

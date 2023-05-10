@@ -11,6 +11,10 @@ from .models import Room, Message
 from rest_framework import generics, viewsets, parsers, views
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from transliterate import slugify
+import re
+from friendship.models import Friend
+
 
 User = get_user_model()
 
@@ -64,6 +68,8 @@ class DeleteChatRoomView(APIView):
         id=request.data.get('id')
         user = get_object_or_404(User, pk=request.user.pk)
         room = get_object_or_404(Room, pk=id)
+        #при удалении группового чата пользователь выходит из него
+        #если там последний пользователь то чат удаляется
         if room.type == '2':
             if room.participant.count() == 1:
                 room.delete()
@@ -72,8 +78,18 @@ class DeleteChatRoomView(APIView):
                 room.participant.remove(user)
                 room.save()
                 return Response({"message": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
+        #при удалении личного чата удаляется друг
+        #если там последний пользователь то чат удаляется
         else:
-            return Response({"message": "Request rejected, you can only log out of the group chat"}, status.HTTP_400_BAD_REQUEST)
+            if room.participant.count() == 1:
+                room.delete()
+                return Response({"message": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
+            else:
+                room.participant.remove(user)
+                room.save()
+                to_user = room.participant.all()[0]
+                Friend.objects.remove_friend(user, to_user)
+                return Response({"message": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
 
 
 class CreateChatRoomView(APIView):
@@ -86,17 +102,41 @@ class CreateChatRoomView(APIView):
         serializer = serializers.RoomNameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         name_chat = serializer.validated_data.get('name')
-        if Room.objects.filter(name=name_chat).first() is None:
-            user = get_object_or_404(User, pk=request.user.pk)
-            room = Room.objects.create(
-                name = name_chat,
-                type = 2
-            )
-            room.participant.add(user)
-            room.save()
-            return Response({"message": "Request accepted, room was created"}, status.HTTP_201_CREATED)
+
+        #проверяем есть ли русские буквы в названии чата
+        def is_cyrrylic(symb):
+            return True if u'\u0400' <= symb <=u'\u04FF' or u'\u0500' <= symb <= u'\u052F' else False
+        rus = False
+        for i in name_chat:
+            a = is_cyrrylic(i)
+            if a == True:
+                rus = True
+                break
+        #если есть транслитерируем имя
+        if rus:
+            disp_name = name_chat
+            url_name = slugify(name_chat)
         else:
-            return Response({"message": "Request rejected, room already exists"}, status.HTTP_400_BAD_REQUEST)
+            disp_name = name_chat
+            url_name = name_chat
+        #создаем неповторяющеесе имя чата добавляя счетчик
+        c = 1
+        while Room.objects.filter(name=url_name).first() is not None:
+            if c == 1:
+                url_name = url_name+str(c)
+            else:
+                url_name = re.sub(r'[^\w\s]+|[\d]+', r'', url_name).strip()+str(c)
+            c+=1
+        #создаем комнату
+        user = get_object_or_404(User, pk=request.user.pk)
+        room = Room.objects.create(
+            display_name = disp_name,
+            name = url_name,
+            type = 2
+        )
+        room.participant.add(user)
+        room.save()
+        return Response({"message": "Request accepted, room was created"}, status.HTTP_201_CREATED)
 
 
 class AddUserInRoom(APIView):

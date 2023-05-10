@@ -10,7 +10,7 @@ class RoomType(models.TextChoices):
 
 
 class Room(models.Model):
-    #view_name = models.CharField(max_length=128, unique=True)
+    display_name = models.CharField(max_length=128, blank=True, null=True)
     name = models.CharField(max_length=128, unique=True)
     participant = models.ManyToManyField(User, blank=False)
     type = models.CharField(max_length=2, choices=RoomType.choices)
