@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react"
-import { Link } from "react-router-dom"
 import axios from "axios"
+import HeaderHomePage from "../HeaderHomepage"
 
 const Registration = () => {
     //создание formData с помощью хука Реакта - useState 
@@ -52,37 +52,52 @@ const Registration = () => {
 
         return (
             <>
-            <Link to="/">Назад</Link>
-            <form onSubmit={hadleSubmit}>
-                <label htmlFor="username">Логин : </label>
+            <HeaderHomePage/>
+            <div className="moving">
+            <form onSubmit={hadleSubmit} className="form">
+                <div className="form_title">Регистрация</div>
+                <div className="form_group">
                     <input 
+                    className="form_input"
                     type="text" 
                     id="username" 
                     name="username" 
-                    placeholder="Логин"
+                    placeholder=" "
                     value={formData.username}
                     onChange={handleChange}
                     />
-                <label htmlFor="email">Почта : </label>
-                    <input 
+                    <label htmlFor="username" className="form_label">Логин</label> 
+                </div>
+                <div className="form_group">
+                    <input
+                    className="form_input" 
                     type="text" 
                     id="email" 
                     name="email" 
-                    placeholder="Почта"
+                    placeholder=" "
                     value={formData.email}
                     onChange={handleChange}
                     />
-                <label htmlFor="password" placeholder="Пароль">Пароль : </label>
-                    <input 
+                    <label htmlFor="email" className="form_label">Почта</label> 
+                </div>
+                <div className="form_group">
+                    <input
+                    className="form_input" 
                     type="text" 
                     id="password" 
                     name="password"
-                    placeholder="Пароль"
+                    placeholder=" "
                     value={formData.password}
                     onChange={handleChange}
                     />
-                <input type="submit" value="Зарегистрироваться"/>
+                    <label htmlFor="password" className="form_label">Пароль</label> 
+                </div>
+                <div className="parent_button">
+                <input type="submit" value="Зарегистрироваться" className="form_button"/>
+                </div>
             </form>
+            </div>
+                
             </>
         )
   
