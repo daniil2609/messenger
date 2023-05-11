@@ -54,7 +54,7 @@ class EnterChatRoomView(APIView):
         room = get_object_or_404(Room, pk=id)
         room.participant.add(user)
         room.save()
-        return Response({"message": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
+        return Response({"detail": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
 
 
 class DeleteChatRoomView(APIView):
@@ -73,23 +73,23 @@ class DeleteChatRoomView(APIView):
         if room.type == '2':
             if room.participant.count() == 1:
                 room.delete()
-                return Response({"message": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
+                return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
             else:
                 room.participant.remove(user)
                 room.save()
-                return Response({"message": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
+                return Response({"detail": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
         #при удалении личного чата удаляется друг
         #если там последний пользователь то чат удаляется
         else:
             if room.participant.count() == 1:
                 room.delete()
-                return Response({"message": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
+                return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
             else:
                 room.participant.remove(user)
                 room.save()
                 to_user = room.participant.all()[0]
                 Friend.objects.remove_friend(user, to_user)
-                return Response({"message": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
+                return Response({"detail": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
 
 
 class CreateChatRoomView(APIView):
@@ -136,7 +136,7 @@ class CreateChatRoomView(APIView):
         )
         room.participant.add(user)
         room.save()
-        return Response({"message": "Request accepted, room was created"}, status.HTTP_201_CREATED)
+        return Response({"detail": "Request accepted, room was created"}, status.HTTP_201_CREATED)
 
 
 class AddUserInRoom(APIView):
@@ -158,18 +158,22 @@ class AddUserInRoom(APIView):
             room = get_object_or_404(Room, pk=id)
         if room is not None:
             if room.type == '2':
-                if User.objects.get(pk=request.user.pk) in room.participant.all():
+                my_user = User.objects.get(pk=request.user.pk)
+                if my_user in room.participant.all():
                     for user_id in participant_list:
-                        user = get_object_or_404(User, pk=user_id)
-                        room.participant.add(user)
-                        room.save()
-                    return Response({"message": "Request accepted, all users have been added"}, status.HTTP_201_CREATED)
+                        another_user = get_object_or_404(User, pk=user_id)
+                        if Friend.objects.are_friends(my_user, another_user):
+                            room.participant.add(another_user)
+                            room.save()
+                            return Response({"detail": "Request accepted, all users have been added"}, status.HTTP_201_CREATED)
+                        else:
+                            return Response({"detail": "The user is not your friend"}, status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({"message": "Request rejected, you are not a member of this room"}, status.HTTP_400_BAD_REQUEST)
+                    return Response({"detail": "Request rejected, you are not a member of this room"}, status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({"message": "Request rejected, you can only add users to the common room"}, status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": "Request rejected, you can only add users to the common room"}, status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({"message": "Request rejected, room not found"}, status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Request rejected, room not found"}, status.HTTP_400_BAD_REQUEST)
 
 
 

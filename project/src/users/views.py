@@ -121,5 +121,7 @@ def session_view(request):
     """ Получить информацию о аунтетификации пользователя
     """
     if not request.user.is_authenticated:
-        return Response({'isAuthenticated: False'}, status=status.HTTP_200_OK)
-    return Response({'isAuthenticated: True'}, status=status.HTTP_200_OK)
+        #return Response({'isAuthenticated: False'}, status=status.HTTP_200_OK)
+    #return Response({'isAuthenticated: True'}, status=status.HTTP_200_OK)
+        return Response({'detail': False}, status=status.HTTP_200_OK)
+    return Response({'detail': True}, status=status.HTTP_200_OK)

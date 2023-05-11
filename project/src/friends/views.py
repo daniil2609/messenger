@@ -34,7 +34,7 @@ class FriendViewSet(viewsets.GenericViewSet):
 
 
     def retrieve(self, request, pk=None):
-        response = {'message': 'This function is not serviced.'}
+        response = {'detail': 'This function is not serviced.'}
         return Response(response, status=status.HTTP_403_FORBIDDEN)
 
 
@@ -51,7 +51,7 @@ class FriendViewSet(viewsets.GenericViewSet):
     @ action(detail=False)
     def sent_requests(self, request):
         '''
-        просмотр исходящих запросов в друзья (даже тех которые уже приняты)
+        просмотр исходящих запросов в друзья
         '''
         friend_requests = Friend.objects.sent_requests(user=request.user)
         self.queryset = friend_requests
@@ -96,7 +96,7 @@ class FriendViewSet(viewsets.GenericViewSet):
             )
         except (AlreadyExistsError, AlreadyFriendsError) as e:
             return Response(
-                {"message": str(e)},
+                {"detail": str(e)},
                 status.HTTP_400_BAD_REQUEST
             )
 
@@ -122,9 +122,9 @@ class FriendViewSet(viewsets.GenericViewSet):
             #room = Room.objects.filter(Q(name='_'+str(request.user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(request.user.pk)+'_') 
             #                           | Q(name='_'+str(to_user.pk)+'_'+str(request.user.pk)+'_'+str(request.user.pk)+'_'+str(to_user.pk)+'_')).first()
             #room.delete()
-            return Response({"message": 'Friend deleted.'}, status.HTTP_201_CREATED)
+            return Response({"detail": 'Friend deleted.'}, status.HTTP_201_CREATED)
         else:
-            return Response({"message": 'Friend not found.'}, status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": 'Friend not found.'}, status.HTTP_400_BAD_REQUEST)
 
 
     @ action(detail=False,
@@ -141,7 +141,7 @@ class FriendViewSet(viewsets.GenericViewSet):
 
         if not friendship_request.to_user == request.user:
             return Response(
-                {"message": "Request for current user not found."},
+                {"detail": "Request for current user not found."},
                 status.HTTP_400_BAD_REQUEST
             )
         #добавляем для друзей чат комнату
@@ -163,7 +163,7 @@ class FriendViewSet(viewsets.GenericViewSet):
             room.participant.add(to_user)
             room.save()
         friendship_request.accept()
-        return Response({"message": "Request accepted, user added to friends."}, status.HTTP_201_CREATED)
+        return Response({"detail": "Request accepted, user added to friends."}, status.HTTP_201_CREATED)
 
     @ action(detail=False,
              serializer_class=FriendshipRequestResponseSerializer,
@@ -178,13 +178,13 @@ class FriendViewSet(viewsets.GenericViewSet):
             FriendshipRequest, pk=id)
         if not friendship_request.to_user == request.user:
             return Response(
-                {"message": "Request for current user not found."},
+                {"detail": "Request for current user not found."},
                 status.HTTP_400_BAD_REQUEST
             )
         friendship_request.reject()
         return Response(
             {
-                "message": "Request rejected, user NOT added to friends."
+                "detail": "Request rejected, user NOT added to friends."
             },
             status.HTTP_201_CREATED
         )
