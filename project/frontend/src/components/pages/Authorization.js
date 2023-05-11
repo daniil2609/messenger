@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react"
-import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom" 
 import axios from "axios"
+import HeaderHomePage from "../HeaderHomepage"
 
 const Authorization = () => {
     //создание formData с помощью хука Реакта - useState 
@@ -43,7 +43,7 @@ const Authorization = () => {
             })
             .then(responce => {
                 if (responce.data.detail = "Successfully logged in."){
-                    navigate("/personalpage")
+                    navigate("/personalpage/chats")
                 }
             })
             .catch(function(error) {
@@ -54,28 +54,39 @@ const Authorization = () => {
             }
     return (
         <>
-            <Link to="/">Назад</Link>
-            <form onSubmit={hadleSubmit}>
-                <label htmlFor="email">Почта : </label>
-                    <input 
+        <HeaderHomePage/>
+        <div className="moving">
+            <form onSubmit={hadleSubmit} className="form">
+            <div className="form_title">Авторизация</div>
+            <div className="form_group">
+                    <input
+                    className="form_input" 
                     type="text" 
                     id="email" 
                     name="email" 
-                    placeholder="Почта"
+                    placeholder=" "
                     value={formData.email}
                     onChange={handleChange}
                     />
-                <label htmlFor="password" placeholder="Пароль">Пароль : </label>
-                    <input 
+                    <label htmlFor="email" className="form_label">Почта</label>
+            </div>
+            <div className="form_group">        
+                    <input
+                    className="form_input" 
                     type="text" 
                     id="password" 
                     name="password"
-                    placeholder="Пароль"
+                    placeholder=" "
                     value={formData.password}
                     onChange={handleChange}
                     />
-                <input type="submit" value="Войти"/>
+                    <label htmlFor="password" className="form_label">Пароль</label>
+            </div>
+            <div className="parent_button">
+                <input type="submit" value="Войти" className="form_button"/>
+            </div>
             </form>
+            </div>
             </>
     )
 }

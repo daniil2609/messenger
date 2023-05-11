@@ -1,33 +1,37 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import axios from "axios"
-import Datauser from "../Datauser"
+import HeaderPersonalPage from "../HeaderPersonalpage";
 
-const Personalpage = () => {
 
-    axios.get("http://127.0.0.1:8000/api/v1/auth/session/", { withCredentials: true })
-    .then(response => {
-        const isAuth = response.data;
-        if (isAuth){
-            //const session = response.headers['set-cookie'][0];
-            //console.log(session)
-            console.log("Успешно!")
+const Isauth = () => {
+    
+    const [authenticated, setAuthenticated] = useState(false);
+
+    useEffect(() => {
+    axios
+    .get("http://127.0.0.1:8000/api/v1/auth/session/")
+    .then((response) => {
+        if(response.status = 200){
+            setAuthenticated(true)
         }
-        else{
-            alert("Пользователь не авторизирован")
-        }
+        
     })
-    .catch(error => {
+    .catch((error)=> {
         console.error(error)
-    })
+    });
+}, []);
 
+    if (authenticated){
+        return (
+            <>
+            <HeaderPersonalPage/>
+            </>
+        )
+    }
+    else {
+        return <div>Пользователь не авторизирован</div>;
+    }
 
-
-    return  (
-        <>
-            <div>YourPage!</div>
-            <Datauser />
-        </>
-    )
 }
 
-export default Personalpage
+export default Isauth
