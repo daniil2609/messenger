@@ -35,8 +35,9 @@ header {
     text-decoration: none;
     font-weight: bold;
     font-size: 20px;
+    transition: 0.5s;
   }
-  
+
   button {
     font-family: sans-serif;
     font-style: normal;

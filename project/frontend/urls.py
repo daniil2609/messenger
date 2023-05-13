@@ -8,6 +8,7 @@ urlpatterns = [
     path('sign_in', views.index),
     path('personalpage', views.index),
     path('personalpage/datauser', views.index),
-    path('personalpage/friends', views.index),
+    path('personalpage/my_friends', views.index),
+    path('personalpage/search_friends', views.index),
     path('personalpage/chats', views.index)
 ]
