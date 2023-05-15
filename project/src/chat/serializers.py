@@ -24,7 +24,7 @@ class MessageSerializer(serializers.ModelSerializer):
     time_message = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
     class Meta:
         model = Message
-        fields = ('user', 'text', 'time_message')
+        fields = ('id', 'user', 'text', 'time_message')
 
     def get_user(self, obj):
         return UserSerializer(obj.user).data

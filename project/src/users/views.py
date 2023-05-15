@@ -39,6 +39,8 @@ def login_view(request):
     """ Вход пользователя
     """
     login_data = serializers.LoginAuth(data=request.data)
+    email = None
+    password = None
     if login_data.is_valid():
         email=login_data.validated_data['email']
         password=login_data.validated_data['password']

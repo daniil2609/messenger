@@ -13,17 +13,7 @@ class Room(models.Model):
     display_name = models.CharField(max_length=128, blank=True, null=True)
     name = models.CharField(max_length=128, unique=True)
     participant = models.ManyToManyField(User, blank=False)
-    type = models.CharField(max_length=2, choices=RoomType.choices)
-
-    @property
-    def get_name(self):
-        if self.type == RoomType.direct_messages:
-            data = []
-            for user in self.participant.all():
-                data.append(user.username)
-            return f'{data[0]}_{data[1]}'
-        return f'{self.name}'
-        
+    type = models.CharField(max_length=2, choices=RoomType.choices)     
 
 
 class Message(models.Model):

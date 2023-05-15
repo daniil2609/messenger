@@ -118,10 +118,12 @@ class FriendViewSet(viewsets.GenericViewSet):
         )
 
         if Friend.objects.remove_friend(request.user, to_user):
-            #удаляем комнату чата
-            #room = Room.objects.filter(Q(name='_'+str(request.user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(request.user.pk)+'_') 
-            #                           | Q(name='_'+str(to_user.pk)+'_'+str(request.user.pk)+'_'+str(request.user.pk)+'_'+str(to_user.pk)+'_')).first()
-            #room.delete()
+            #удаляем текущего пользователя из личного чата
+            room = Room.objects.filter(Q(name='_'+str(request.user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(request.user.pk)+'_') 
+                                       | Q(name='_'+str(to_user.pk)+'_'+str(request.user.pk)+'_'+str(request.user.pk)+'_'+str(to_user.pk)+'_')).first()
+            if room is not None:
+                room.participant.remove(request.user)
+                room.save()
             return Response({"detail": 'Friend deleted.'}, status.HTTP_201_CREATED)
         else:
             return Response({"detail": 'Friend not found.'}, status.HTTP_400_BAD_REQUEST)
@@ -150,7 +152,7 @@ class FriendViewSet(viewsets.GenericViewSet):
         #если комната уже существует (пользователь ранее ее удалил) то добавляем его обратно
         room = Room.objects.filter(Q(name='_'+str(user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(user.pk)+'_') | Q(name='_'+str(to_user.pk)+'_'+str(user.pk)+'_'+str(user.pk)+'_'+str(to_user.pk)+'_')).first()
         if room is not None:
-            room.participant.add(user)
+            room.participant.add(to_user)
             room.save()
         #если не существует то создаем новую комнату
         else:

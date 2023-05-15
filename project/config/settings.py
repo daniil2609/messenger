@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import redis
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -187,13 +188,13 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 #перенаправление после подтверждения email
-SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'
+SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/sign_in'
 ERROR_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'
 
 #настройки передачи csrf токенов (подходит для сессионной аутентификации)
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
-CSRF_COOKIE_HTTPONLY = False  # False since we will grab it via universal-cookies
+CSRF_COOKIE_HTTPONLY = False
 SESSION_COOKIE_HTTPONLY = True
 # PROD ONLY
 # CSRF_COOKIE_SECURE = True
@@ -202,6 +203,8 @@ SESSION_COOKIE_HTTPONLY = True
 
 REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
 REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_DB = 0
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '12345')
 
 CHANNEL_LAYERS = {
     'default': {
@@ -211,4 +214,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+
+
+REDIS_CLIENT = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
