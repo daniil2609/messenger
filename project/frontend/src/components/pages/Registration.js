@@ -41,6 +41,7 @@ const Registration = () => {
             withCredentials: true
         })
         .then(responce => {
+            alert("Подтвердите почту!")
             console.log(responce.data.detail)
         })
         .catch(function(error) {

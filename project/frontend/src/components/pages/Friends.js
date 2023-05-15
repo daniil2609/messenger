@@ -1,30 +1,43 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import HeaderPersonalPage from "../HeaderPersonalpage"
 import HeaderFriends from "../HeaderFriends";
 import axios from "axios";
+import AdditionFriends from "../AdditionFriends";
 
 
 const Friends = () => {
     
+    const [friends, setFriends] = useState([])
+
+    useEffect(() => {
     axios
         .get("http://127.0.0.1:8000/api/v1/friend/", { withCredentials: true })
         .then( response => {
-            setData(response.data)
-            console.log(response.data)
+            setFriends(response.data)
         })
         .catch (error => console.error(error));
+    }, []);
 
-    
-    
-    return (
-        <>
-        <HeaderPersonalPage/>
-        <HeaderFriends />
-        
-
-
-        </>
-    )
+    if (friends.length === 0){
+        return (
+            <>
+            <HeaderPersonalPage/>
+            <HeaderFriends />
+            <AdditionFriends/>
+            <div>Список друзей пуст</div>
+            </>
+        )
+    }
+    else{
+        return(
+            <>
+            <HeaderPersonalPage/>
+            <HeaderFriends />
+            <AdditionFriends/>
+            <div>{friends}</div>
+            </>
+        )
+    }
 }
 
 export default Friends

@@ -6,12 +6,14 @@ const HeaderFriends = () => {
     return (
         <>
         <div className="moving">
+            <header>
             <nav>
                 <ul>
                 <li><Link to="/personalpage/my_friends">Мои друзья</Link></li>
                 <li><Link to="/personalpage/search_friends">Найти друзей</Link></li>
                 </ul>
             </nav>
+            </header>  
             
         </div>
         </>
