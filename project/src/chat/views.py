@@ -50,9 +50,8 @@ class EnterChatRoomView(APIView):
         (нужен id чата)
         """
         id=request.data.get('id')
-        user = get_object_or_404(User, pk=request.user.pk)
         room = get_object_or_404(Room, pk=id)
-        room.participant.add(user)
+        room.participant.add(request.user)
         room.save()
         return Response({"detail": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
 
@@ -176,15 +175,3 @@ class AddUserInRoom(APIView):
             return Response({"detail": "Request rejected, room not found"}, status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
-#dj channels:
-#тестовый чат на http://127.0.0.1:8000/test/lobby/
-def index(request):
-    return render(request, 'test/index_dj_test_channels.html')
-
-def room(request, room_name):
-    return render(request, 'test/room_dj_test_channels.html', {
-        'room_name': room_name
-    })
