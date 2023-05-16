@@ -3,11 +3,17 @@ import HeaderPersonalPage from "../HeaderPersonalpage"
 import HeaderFriends from "../HeaderFriends";
 import axios from "axios";
 import AdditionFriends from "../AdditionFriends";
+import DelFriend from "../DelFriend";
 
 
 const Friends = () => {
     
-    const [friends, setFriends] = useState([])
+    const [friends, setFriends] = useState([{
+        username: '',
+        email: '',
+        last_name: '',
+        phone_number: ''
+    }])
 
     useEffect(() => {
     axios
@@ -22,9 +28,13 @@ const Friends = () => {
         return (
             <>
             <HeaderPersonalPage/>
+            <div className="form-wrapper">
             <HeaderFriends />
+            <form className="form" style={{height: '40px', textAlign: 'center'}}>
+                    <div className="form_group" > Список друзей пуст</div>
+                </form>
             <AdditionFriends/>
-            <div>Список друзей пуст</div>
+            </div>
             </>
         )
     }
@@ -32,9 +42,21 @@ const Friends = () => {
         return(
             <>
             <HeaderPersonalPage/>
+            <div className="form-wrapper">
             <HeaderFriends />
+            {friends.map((friendData, index)=>(
+                    <form className="form" key={index} style={{height: '130px'}}>
+                        <div className="form_group"> Логин:
+                            {friendData.username}
+                        </div>
+                        <div className="form_group"> Почта:
+                            {friendData.email}
+                        </div>
+                        <DelFriend friendData={friendData}/>
+                </form>
+            ))}
             <AdditionFriends/>
-            <div>{friends}</div>
+            </div>
             </>
         )
     }

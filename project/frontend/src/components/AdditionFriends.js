@@ -18,7 +18,7 @@ const AdditionFriends = () => {
 
     return(
         <>
-        <form className="form">
+        <form className="form" style={{height: '200px'}}>
           <div className="form_group">
             <div className="form_title">История запросов:</div>
           </div>

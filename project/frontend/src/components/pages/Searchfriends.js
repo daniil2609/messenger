@@ -3,6 +3,7 @@ import HeaderFriends from "../HeaderFriends";
 import HeaderPersonalPage from "../HeaderPersonalpage";
 import axios from "axios";
 import AdditionFriends from "../AdditionFriends";
+import ReqFriend from "../ReqFriend";
 
 const SearchFriends = () => {
     const [formData, setFormData] = useState({
@@ -52,38 +53,13 @@ const SearchFriends = () => {
                     alert("Ошибка поиска")
                 })
                 }
-
-                const AddFriend = (e, email) => {
-                    e.preventDefault();
-                    console.log(email)
-                    setreqfriend({
-                        to_user : email,
-                        message : ''
-                    })
-                }
-
-                useEffect(() => {
-                    axios.post("http://127.0.0.1:8000/api/v1/friend/add_friend/", reqfriend, {
-                        headers: {
-                          'X-CSRFToken': csrfToken
-                        },
-                        withCredentials: true
-                      })
-                      .then(response => {
-                        console.log(response);
-                      })
-                      .catch(error => {
-                        console.log(error);
-                      });
-                  }, [reqfriend]);
-
     if (searching == false){
         return (
             <>
                 <HeaderPersonalPage/>
+                <div className="form-wrapper">
                 <HeaderFriends />
-                <AdditionFriends />
-                <form onSubmit={hadleSubmit} className="form" >
+                <form onSubmit={hadleSubmit} className="form" style={{height: '100px'}}>
                     <div className="form_group">
                         <input 
                         className="form_input"
@@ -100,6 +76,8 @@ const SearchFriends = () => {
                     <input type="submit" value="Поиск" className="form_button"/>
                     </div>
                 </form>
+                <AdditionFriends />
+                </div>
             </>
         )
     } else{
@@ -107,9 +85,10 @@ const SearchFriends = () => {
             return(
                 <>
                     <HeaderPersonalPage />
+                    <div className="form-wrapper">
                     <HeaderFriends />
-                    <AdditionFriends />
-                    <form onSubmit={hadleSubmit} className="form">
+                    <div className="form-center">
+                    <form onSubmit={hadleSubmit} className="form" style={{height: '100px'}}>
           <div className="form_group">
             <input 
               className="form_input"
@@ -126,9 +105,12 @@ const SearchFriends = () => {
             <input type="submit" value="Поиск" className="form_button"/>
           </div>
         </form>
-            <form className="form">
+            <form className="form" style={{marginTop: '20px', textAlign: 'center'}}>
                 <div className="form_group"> Пользователи не найдены! </div>  
             </form>
+            </div>
+            <AdditionFriends />
+            </div>
                 </>
             )
         }
@@ -136,9 +118,10 @@ const SearchFriends = () => {
             return (
                 <>
         <HeaderPersonalPage />
+        <div className="form-wrapper">
         <HeaderFriends />
-        <AdditionFriends />
-        <form onSubmit={hadleSubmit} className="form">
+        <div className="form-center">
+        <form onSubmit={hadleSubmit} className="form" style={{height: '100px'}}>
           <div className="form_group">
             <input 
               className="form_input"
@@ -156,18 +139,19 @@ const SearchFriends = () => {
           </div>
         </form>
         {friend.map((friendData, index)=>(
-            <form className="form" key={index}>
+            <form className="form" key={index} style={{marginTop: '20px'}}>
                 <div className="form_group"> Логин: 
                     {friendData.username}
                 </div>
                 <div className="form_group"> Почта: 
                     {friendData.email}
                 </div>
-                <div className="parent_button">
-                    <button className="form_button" onClick={(e) => {AddFriend(e, friendData.email)}}> Добавить в друзья </button>
-                </div>
+                <ReqFriend friendData={friendData}></ReqFriend>
         </form>
             ))}
+        </div>
+        <AdditionFriends />
+        </div>
       </>
             )
         }
