@@ -51,9 +51,12 @@ class EnterChatRoomView(APIView):
         """
         id=request.data.get('id')
         room = get_object_or_404(Room, pk=id)
-        room.participant.add(request.user)
-        room.save()
-        return Response({"detail": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
+        if room.type == '2':
+            room.participant.add(request.user)
+            room.save()
+            return Response({"detail": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
+        else:
+            return Response({"detail": "You can only join public shared chats"}, status.HTTP_403_FORBIDDEN)
 
 
 class DeleteChatRoomView(APIView):
@@ -69,7 +72,7 @@ class DeleteChatRoomView(APIView):
         room = get_object_or_404(Room, pk=id)
         #при удалении группового чата пользователь выходит из него
         #если там последний пользователь то чат удаляется
-        if room.type == '2':
+        if room.type == '2' or room.type == '3':
             if room.participant.count() == 1:
                 room.delete()
                 return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
@@ -98,9 +101,10 @@ class CreateChatRoomView(APIView):
         Создает групповой чат
         (нужно имя чата)
         """
-        serializer = serializers.RoomNameSerializer(data=request.data)
+        serializer = serializers.RoomNameAndTypeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         name_chat = serializer.validated_data.get('name')
+        type_chat = serializer.validated_data.get('type')
 
         #проверяем есть ли русские буквы в названии чата
         def is_cyrrylic(symb):
@@ -128,14 +132,26 @@ class CreateChatRoomView(APIView):
             c+=1
         #создаем комнату
         user = get_object_or_404(User, pk=request.user.pk)
-        room = Room.objects.create(
-            display_name = disp_name,
-            name = url_name,
-            type = 2
-        )
-        room.participant.add(user)
-        room.save()
-        return Response({"detail": "Request accepted, room was created"}, status.HTTP_201_CREATED)
+        if type_chat == '2':
+            room = Room.objects.create(
+                display_name = disp_name,
+                name = url_name,
+                type = 2
+            )
+            room.participant.add(user)
+            room.save()
+            return Response({"detail": "Request accepted, room was created"}, status.HTTP_201_CREATED)
+        elif type_chat == '3':
+            room = Room.objects.create(
+                display_name = disp_name,
+                name = url_name,
+                type = 3
+            )
+            room.participant.add(user)
+            room.save()
+            return Response({"detail": "Request accepted, room was created"}, status.HTTP_201_CREATED)
+        else:
+            return Response({"detail": "Incorrect chat type"}, status.HTTP_400_BAD_REQUEST)
 
 
 class AddUserInRoom(APIView):
@@ -156,7 +172,7 @@ class AddUserInRoom(APIView):
         if id is not None:
             room = get_object_or_404(Room, pk=id)
         if room is not None:
-            if room.type == '2':
+            if room.type == '2' or room.type == '3':
                 my_user = User.objects.get(pk=request.user.pk)
                 if my_user in room.participant.all():
                     for user_id in participant_list:

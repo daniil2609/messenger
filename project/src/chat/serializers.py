@@ -19,6 +19,11 @@ class RoomNameSerializer(serializers.Serializer):
     name = serializers.CharField(max_length = 128)
 
 
+class RoomNameAndTypeSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length = 128)
+    type = serializers.CharField(max_length = 1)
+
+
 class MessageSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     time_message = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")

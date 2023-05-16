@@ -196,7 +196,7 @@ class FriendViewSet(viewsets.GenericViewSet):
         )
     
     @ action(detail=False,
-             serializer_class=FriendSearchSerializer,
+             serializer_class=FriendSearchRequestSerializer,
              methods=['post'])
     def search_friends(self, request):
         """
@@ -207,5 +207,5 @@ class FriendViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         message=serializer.validated_data.get('message')
         search_results = User.objects.filter(Q(email__icontains=message) | Q(username__icontains=message)).exclude(pk=request.user.pk)[:10]
-        return Response(FriendSerializer(search_results, many=True).data)
+        return Response(FriendSearchResponseSerializer(search_results, many=True, context={'user': request.user}).data)
 
