@@ -19,8 +19,8 @@ const Outgoing = () => {
     if (friend.length === 0){
         return(
             <>
-            <Link to="/personalpage/my_friends">Назад</Link>
             <HeaderPersonalPage />
+            <Link to="/personalpage/my_friends">Назад</Link>
                 <form className="form">
                     <div className="form_group"> Нет исходящих запросов</div>
                 </form>
@@ -29,14 +29,11 @@ const Outgoing = () => {
     else{
         return (
             <>
-            <Link to="/personalpage/my_friends">Назад</Link>
             <HeaderPersonalPage />
+            <Link to="/personalpage/my_friends">Назад</Link>
             {friend.map((friendData, index)=>(
                 <form className="form" key={index}>
                     <div className="form_group"> Пользователь:
-                        {friendData.to_user}
-                    </div>
-                    <div className="form_group"> Почта: 
                         {friendData.to_user}
                     </div>
             </form>
