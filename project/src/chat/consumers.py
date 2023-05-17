@@ -69,6 +69,7 @@ class ChatConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
+        self.send_online_user_list()
         text_data_json = json.loads(text_data)
         message_type = text_data_json["type"]
         if message_type == "chat_message":
@@ -133,7 +134,7 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name, {
                 'type': 'online_users',
                 'users': [username.decode('utf-8') for username in online_user_list],
-            },         
+            },
         )
         
     def online_users(self, event):
