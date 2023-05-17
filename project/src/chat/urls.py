@@ -4,9 +4,6 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path('test/', index, name='index'),
-    path('test/<str:room_name>/', room, name='room'),
-
     path('room_list/', ListRoomView.as_view(), name='room_list'),
     path('search_room/', SearchChatRoomView.as_view(), name='search_room'),
     path('enter_room/', EnterChatRoomView.as_view(), name='enter_room'),

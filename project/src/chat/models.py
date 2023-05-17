@@ -7,6 +7,7 @@ User = get_user_model()
 class RoomType(models.TextChoices):
     direct_messages = 1, 'personal_chat'
     common_channel = 2, 'group_chat'
+    common_private_channel = 3, 'group_private_chat'
 
 
 class Room(models.Model):

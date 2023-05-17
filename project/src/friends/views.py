@@ -122,8 +122,11 @@ class FriendViewSet(viewsets.GenericViewSet):
             room = Room.objects.filter(Q(name='_'+str(request.user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(request.user.pk)+'_') 
                                        | Q(name='_'+str(to_user.pk)+'_'+str(request.user.pk)+'_'+str(request.user.pk)+'_'+str(to_user.pk)+'_')).first()
             if room is not None:
-                room.participant.remove(request.user)
-                room.save()
+                if room.participant.count() == 1:
+                    room.delete()
+                else:
+                    room.participant.remove(request.user)
+                    room.save()
             return Response({"detail": 'Friend deleted.'}, status.HTTP_201_CREATED)
         else:
             return Response({"detail": 'Friend not found.'}, status.HTTP_400_BAD_REQUEST)
@@ -153,6 +156,7 @@ class FriendViewSet(viewsets.GenericViewSet):
         room = Room.objects.filter(Q(name='_'+str(user.pk)+'_'+str(to_user.pk)+'_'+str(to_user.pk)+'_'+str(user.pk)+'_') | Q(name='_'+str(to_user.pk)+'_'+str(user.pk)+'_'+str(user.pk)+'_'+str(to_user.pk)+'_')).first()
         if room is not None:
             room.participant.add(to_user)
+            room.participant.add(user)
             room.save()
         #если не существует то создаем новую комнату
         else:
@@ -192,7 +196,7 @@ class FriendViewSet(viewsets.GenericViewSet):
         )
     
     @ action(detail=False,
-             serializer_class=FriendSearchSerializer,
+             serializer_class=FriendSearchRequestSerializer,
              methods=['post'])
     def search_friends(self, request):
         """
@@ -203,5 +207,5 @@ class FriendViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         message=serializer.validated_data.get('message')
         search_results = User.objects.filter(Q(email__icontains=message) | Q(username__icontains=message)).exclude(pk=request.user.pk)[:10]
-        return Response(FriendSerializer(search_results, many=True).data)
+        return Response(FriendSearchResponseSerializer(search_results, many=True, context={'user': request.user}).data)
 
