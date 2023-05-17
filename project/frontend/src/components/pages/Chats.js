@@ -2,7 +2,7 @@ import React from "react";
 import HeaderPersonalPage from "../HeaderPersonalpage";
 import Searchchats from "./Searchchats";
 import ListChats from "../ListChats"
-
+import useWebSocket from "react-use-websocket"; 
 
 const Chats = () => { 
 
@@ -36,7 +36,6 @@ const Chats = () => {
         <HeaderPersonalPage/>
         <Searchchats/>
         <ListChats/>
-        <div>Hello!</div>
         </>
 
     )

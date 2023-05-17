@@ -14,7 +14,8 @@ export default function OpenChat(props) {
         onOpen: () => { 
             console.log("Connected chat!"); 
         }, 
-        onClose: () => { 
+        onClose: () => {
+            setMessageHistory([])
             console.log("Disconnected chat!"); 
         }, 
         // тут приходят сообщения с сервера 
