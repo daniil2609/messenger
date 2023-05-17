@@ -165,3 +165,49 @@ header {
   flex-direction: column;
   justify-content: center;
 }
+
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.names {
+  width: 30%;
+}
+
+.chat {
+  width: 70%;
+}
+
+.names_list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.display_name{
+  cursor: pointer;
+  padding: 5px;
+}
+
+.display_name.selected {
+  background-color: lightblue;
+}
+
+.chat_title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.chat_messages {
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.no-chat-selected {
+  padding: 10px;
+  text-align: center;
+  font-style: italic;
+  color: gray;
+}
