@@ -15,3 +15,9 @@ class AuthUserAdmin(admin.ModelAdmin):
     list_display_links = ('id',)
     filter_horizontal = ['read_users']
 
+
+@admin.register(models.Task)
+class AuthUserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'owner', 'board_name', 'name')
+    list_display_links = ('id',)
+
