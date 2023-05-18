@@ -119,6 +119,7 @@ class CreateChatRoomView(APIView):
         if rus:
             disp_name = name_chat
             url_name = slugify(name_chat)
+            url_name = url_name.replace('-', '_')
         else:
             disp_name = name_chat
             url_name = name_chat
@@ -159,30 +160,24 @@ class AddUserInRoom(APIView):
     def post(self, request, room=None):
         """
         Добавляет пользователей в групповой чат
-        (нужно имя или id чата и id пользователей(в списке))
+        (нужно id чата и id пользователей(в списке))
         """
         id=request.data.get('id')
-        name_json=request.data.get('name', None)
         participant_list=request.data.get('participant')
-        if name_json is not None:
-            serializer = serializers.RoomNameSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            name_room = serializer.validated_data.get('name')
-            room = get_object_or_404(Room, name=name_room)
         if id is not None:
             room = get_object_or_404(Room, pk=id)
         if room is not None:
             if room.type == '2' or room.type == '3':
                 my_user = User.objects.get(pk=request.user.pk)
                 if my_user in room.participant.all():
+                    add_users = []
                     for user_id in participant_list:
                         another_user = get_object_or_404(User, pk=user_id)
                         if Friend.objects.are_friends(my_user, another_user):
                             room.participant.add(another_user)
                             room.save()
-                            return Response({"detail": "Request accepted, all users have been added"}, status.HTTP_201_CREATED)
-                        else:
-                            return Response({"detail": "The user is not your friend"}, status.HTTP_400_BAD_REQUEST)
+                            add_users.append(another_user.pk)
+                    return Response({"detail": f"Users have been added: {add_users}"}, status.HTTP_201_CREATED)
                 else:
                     return Response({"detail": "Request rejected, you are not a member of this room"}, status.HTTP_400_BAD_REQUEST)
             else:
@@ -191,3 +186,30 @@ class AddUserInRoom(APIView):
             return Response({"detail": "Request rejected, room not found"}, status.HTTP_400_BAD_REQUEST)
 
 
+class EditNameChat(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request):
+        """
+        Изменяет display_name чата
+        (нужно id чата)
+        """
+        id_chat=request.data.get('id')
+        serializer = serializers.RoomNameSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        name_chat = serializer.validated_data.get('name')
+        if id_chat is not None:
+            room = get_object_or_404(Room, pk=id_chat)
+        if room is not None:
+            if room.type == '2' or room.type == '3':
+                my_user = User.objects.get(pk=request.user.pk)
+                if my_user in room.participant.all():
+                    room.display_name = name_chat
+                    room.save()
+                    return Response({"detail": "You have successfully changed the name"}, status.HTTP_201_CREATED)
+                else:
+                    return Response({"detail": "Request rejected, you are not a member of this room"}, status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"detail": "Request rejected, you can only add users to the common room"}, status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"detail": "Request rejected, room not found"}, status.HTTP_400_BAD_REQUEST)
+            
