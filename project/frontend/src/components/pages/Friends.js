@@ -44,8 +44,9 @@ const Friends = () => {
             <HeaderPersonalPage/>
             <div className="form-wrapper">
             <HeaderFriends />
+            <div className="center" style={{justifyContent: "center"}}>
             {friends.map((friendData, index)=>(
-                    <form className="form" key={index} style={{height: '130px'}}>
+                    <form className="form" key={index} style={{height: '130px', marginBottom:'20px'}}>
                         <div className="form_group"> Логин:
                             {friendData.username}
                         </div>
@@ -55,6 +56,7 @@ const Friends = () => {
                         <DelFriend friendData={friendData}/>
                 </form>
             ))}
+            </div>
             <AdditionFriends/>
             </div>
             </>

@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import OpenChat from "./OpenChat";
-
+import SearchChats from './Searchchats'
 
 const ListChats = () =>{
     const [chatfriends, setChatFriends] = useState('')
@@ -39,7 +39,9 @@ const ListChats = () =>{
             return(
                 <>
                     <div className="container">
-                        <div className="names">
+                        <div> 
+                        <SearchChats/>
+                        <form className="form" style={{width: '350px', padding: '20px', marginTop: '10px', marginLeft:'10px'}}>
                             <ul className="names_list">
                                 {chatfriends.map((chat, index) =>
                                     <li 
@@ -53,11 +55,12 @@ const ListChats = () =>{
                                     </li>
                                 )}
                             </ul>
+                        </form>
                         </div>
                         <div className="chat">
                             {selectedChat ? (
-                            <>
-                                <div className="chat_title">{selectedChat.display_name}</div>
+                            <>  <div className="parrent_title">
+                                <div className="username_in_chat" style={{justifyContent:'center', marginTop:'10px'}}>{selectedChat.display_name}</div></div>
                                 <div className="chat_messages">
                                     <OpenChat selectedChat={selectedChat}/>
                                 </div>

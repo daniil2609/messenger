@@ -133,9 +133,12 @@ header {
   display: block;
 }
 
-.form_button:focus,
 .form_button:hover{
   background-color: #003c7d;
+}
+
+.form_button:disabled {
+  background-color: #00A0F0;
 }
 
 .form_input:focus ~ .form_label,
@@ -176,7 +179,9 @@ header {
 }
 
 .chat {
-  width: 70%;
+  width: 90%;
+  font-family: sans-serif;
+  font-style: normal;
 }
 
 .names_list {
@@ -186,12 +191,13 @@ header {
 
 .display_name{
   cursor: pointer;
-  padding: 5px;
+  padding: 10px;
 }
 
 .display_name.selected {
-  background-color: lightblue;
+  background-color: #00A0F0;
 }
+
 
 .chat_title {
   font-weight: bold;
@@ -199,15 +205,59 @@ header {
 }
 
 .chat_messages {
-  border: 1px solid #ccc;
+  margin-left: 10px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px #ccc;
   padding: 10px;
-  height: 300px;
-  overflow-y: scroll;
+  height: 570px;
 }
 
 .no-chat-selected {
   padding: 10px;
   text-align: center;
-  font-style: italic;
   color: gray;
 }
+
+.message{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.message_text{
+  padding-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding-bottom: 10px;
+  height: 380px;
+}
+
+.time{
+  text-align: right;
+}
+
+.username_in_chat{
+  width: 50%;
+  text-align: center;
+  padding: 5px 10px;
+  
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  background-color: #00A0F0;
+}
+
+.parrent_title{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.messages{
+  padding: 10px 20px;
+}
+
+
+

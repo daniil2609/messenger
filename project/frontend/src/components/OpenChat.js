@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState, useRef, useEffect } from "react"; 
 import useWebSocket, { ReadyState } from "react-use-websocket"; 
 
 export default function OpenChat(props) {
@@ -9,14 +9,37 @@ export default function OpenChat(props) {
     const [messageHistory, setMessageHistory] = useState([]); 
     const [message, setMessage] = useState(""); 
 
-     //для чата: 
+    const chatContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      }, [messageHistory, startMessage]);
+
+    const handleClose = () => {
+        console.log("Disconnected chat!");
+        setStartMessage([]);
+        setMessageHistory([]);
+        setOnlineUsers([]);
+    }
+
+
+    const OnlineMenu = () => {
+        const users = onlineUsers;
+        const arrayString = users.join("\n");
+        alert("В сети: \n" + arrayString);
+      };
+
+
+
+    //для чата: 
      const { readyState, sendJsonMessage } = useWebSocket(`ws://127.0.0.1:8000/ws/chat/room/${props.selectedChat.name}/`, { 
         onOpen: () => { 
             console.log("Connected chat!"); 
         }, 
         onClose: () => {
-            setMessageHistory([])
-            console.log("Disconnected chat!"); 
+            handleClose()
         }, 
         // тут приходят сообщения с сервера 
         onMessage: (e) => { 
@@ -95,41 +118,50 @@ export default function OpenChat(props) {
         setMessageidDown(""); 
     }; 
 
-
+      
     return ( 
-
-        <div>
-            <ul> 
+        <>
+            <div className="parrent_title" style={{justifyContent:'space-between'}}> Соединение: {' ' + connectionStatus}
+                <button className="form_button" style={{height: '40px'}} onClick={OnlineMenu}>Онлайн</button>
+            </div>
+            
+            <ul className="message_text" style={{ overflowY: "auto", maxHeight: "400px" }} ref={chatContainerRef}> 
                 {startMessage.map((message, idx) => ( 
-                    <div className="border border-gray-200 py-3 px-3" key={idx}> 
-                        {message.text}:{message.user.username}:{message.time_message} 
-                    </div> 
+                    <form className="form" style={{marginTop: '20px', padding: '10px'}} key={idx}>
+                        <div className="username_in_chat">{message.user.username} </div>
+                        <div className="messages">{message.text} </div> 
+                        <div className="time">{message.time_message.substring(11, 16)}  </div>  
+                    </form> 
                 ))} 
                 {messageHistory.map((message, idx) => ( 
-                    <div className="border border-gray-200 py-3 px-3" key={idx}> 
-                        {message.text}:{message.user.username}:{message.time_message} 
-                    </div> 
+                    <form className="form" style={{marginTop: '20px', padding: '10px', transition: '1s'}} key={idx}>
+                        <div className="username_in_chat">{message.user.username} </div>
+                        <div className="messages">{message.text} </div> 
+                        <div className="time">{message.time_message.substring(11, 16)}  </div>  
+                    </form>
                 ))} 
             </ul> 
-             
-            <span>WebSocket статус чата: {connectionStatus}</span> 
-            <br></br> 
-            <br></br> 
-            <input 
-                name="message" 
-                placeholder="Введите сообщение" 
+            <div className="parrent_title">
+            <form className="form" style={{width: '350px', height: '45px', padding: '20px'}}>
+            <div className="form_group" style={{display: 'flex'}}>
+                <input 
                 onChange={handleChangeMessage} 
+                className="form_input"
+                type="text" 
+                id="message" 
+                name="message" 
+                placeholder=" "
                 value={message} 
-                className="ml-2 shadow-sm sm:text-sm border-gray-300 bg-gray-100 rounded-md" 
-            /> 
-            <button className="ml-3 bg-gray-300 px-3 py-1" onClick={handleSubmit}> 
-                Отправить 
-            </button> 
-             
-            <p>Пользователи онлайн:</p> 
-            <p>{onlineUsers}</p> 
-             
-            <input 
+                />
+                <label htmlFor="search" className="form_label">Напечатать...</label>
+                <button type="button" onClick={handleSubmit} style={{padding: '6px 15px', marginLeft: '10px'}} className="form_button">&uarr;</button>    
+          </div>
+        </form>
+        </div>
+ 
+
+                 
+            {/*<input 
                 name="paginate_up" 
                 placeholder="Введите последний id сообщения которое у вас есть (он самый маленький)" 
                 onChange={handleChangePaginateUp} 
@@ -151,8 +183,9 @@ export default function OpenChat(props) {
             /> 
             <button className="ml-3 bg-gray-300 px-3 py-1" onClick={handlePaginateDown}> 
                 Загрузить сообщения ниже 
-            </button> 
+            </button> */}
+            
              
-        </div> 
+            </>
     ); 
 }

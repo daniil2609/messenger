@@ -1,6 +1,22 @@
-import React from "react";
+import React, {useState} from "react";
+import AddGroupChat from "./AddGroupChat";
 
 const Searchchats = () =>{
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [sign, setSign] = useState("+")
+
+    const AddGroup = () => {
+        if (sign === "+") {
+            setSign("-");
+            setIsOpen(!isOpen);
+          } else {
+            setSign("+");
+            setIsOpen(false);
+          }
+    }
+    
+
     return(
         <>
         <form className="form" style={{width: '350px', padding: '20px', marginTop: '10px', marginLeft:'10px'}}>
@@ -14,9 +30,11 @@ const Searchchats = () =>{
                 />
                 <label htmlFor="search" className="form_label">Поиск групповых чатов</label>
                 <button type="button" style={{marginLeft: '20px', padding: '6px 15px'}} className="form_button">&#128270;</button>
-                <button type="button" style={{marginLeft: '20px', padding: '6px 15px'}} className="form_button">+</button>
+                <button type="button" style={{marginLeft: '20px', padding: '6px 15px'}} className="form_button" onClick={AddGroup}>{sign}</button>
           </div>
         </form>
+
+        {isOpen && (<AddGroupChat/>)}
         </>
 
     )
