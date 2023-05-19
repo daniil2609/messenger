@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from friendship.models import FriendshipRequest
-from .models import Room, Message
+from .models import Room, Message, Task
 from src.users.serializers import UserSerializer
 
 User = get_user_model()
@@ -33,5 +33,11 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return UserSerializer(obj.user).data
+    
 
+class KanbanTaskSerializer(serializers.ModelSerializer):
+    time_create = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S")
+    class Meta:
+        model = Task
+        fields = ('id', 'name', 'description', 'time_create')
 
