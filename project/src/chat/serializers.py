@@ -19,7 +19,7 @@ class RoomSearchSerializer(serializers.ModelSerializer):
     room_user_type = serializers.SerializerMethodField()
     class Meta:
         model = Room
-        fields = ('id', 'display_name', 'name', 'room_user_type', 'participant', 'type')
+        fields = ('id', 'display_name', 'name', 'room_user_type', 'type')
 
     def get_room_user_type(self, obj):
         user_my = self.context.get('user', None)

@@ -27,6 +27,8 @@ class ListRoomView(generics.ListAPIView):
     def get_queryset(self):
         return Room.objects.filter(participant=self.request.user.pk)
 
+
+
 class SearchChatRoomView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def post(self, request):
@@ -37,7 +39,9 @@ class SearchChatRoomView(APIView):
         serializer = serializers.RoomSearchMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message=serializer.validated_data.get('message')
-        search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2))[:20]
+        #поиск и своих и новых чатов
+        #search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2))[:20]
+        search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2)).exclude(participant=request.user)[:20]
         return Response(serializers.RoomSearchSerializer(search_results, many=True, context={'user': request.user}).data)
 
 
