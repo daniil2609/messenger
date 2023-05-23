@@ -20,7 +20,7 @@ const Chats = () => {
                 case "notification": 
                     console.log('Начало уведомления:') 
                     console.log(data.message) 
-                    console.log(data.room_name) 
+                    console.log(data.room) 
                     console.log('Конец уведомления:') 
                     break; 
                 default: 
