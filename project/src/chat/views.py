@@ -25,8 +25,9 @@ class ListRoomView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        #return Room.objects.filter(Q(name__icontains='_'+str(request.user.pk)+'_') | Q(participant=request.user.pk))
         return Room.objects.filter(participant=self.request.user.pk)
+
+
 
 class SearchChatRoomView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -35,11 +36,13 @@ class SearchChatRoomView(APIView):
         Ищет в базе комнаты чатов по запросу
         Возвращает список из 20(max) подходящих записей
         """
-        serializer = serializers.RoomSearchSerializer(data=request.data)
+        serializer = serializers.RoomSearchMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         message=serializer.validated_data.get('message')
-        search_results = Room.objects.filter(name__icontains=message, type=2).exclude(participant=self.request.user.pk)[:20]
-        return Response(serializers.RoomSerializer(search_results, many=True).data)
+        #поиск и своих и новых чатов
+        #search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2))[:20]
+        search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2)).exclude(participant=request.user)[:20]
+        return Response(serializers.RoomSearchSerializer(search_results, many=True, context={'user': request.user}).data)
 
 
 class EnterChatRoomView(APIView):
@@ -61,7 +64,7 @@ class EnterChatRoomView(APIView):
 
 class DeleteChatRoomView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    def delete(self, request, id=None):
+    def post(self, request, id=None):
         """
         Удаляет пользователя из чата (только для групповых чатов)
         (нужен id чата)
@@ -72,26 +75,29 @@ class DeleteChatRoomView(APIView):
         room = get_object_or_404(Room, pk=id)
         #при удалении группового чата пользователь выходит из него
         #если там последний пользователь то чат удаляется
-        if room.type == '2' or room.type == '3':
-            if room.participant.count() == 1:
-                room.delete()
-                return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
+        if user in room.participant.all():
+            if room.type == '2' or room.type == '3':
+                if room.participant.count() == 1:
+                    room.delete()
+                    return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
+                else:
+                    room.participant.remove(user)
+                    room.save()
+                    return Response({"detail": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
+            #при удалении личного чата удаляется друг
+            #если там последний пользователь то чат удаляется
             else:
-                room.participant.remove(user)
-                room.save()
-                return Response({"detail": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
-        #при удалении личного чата удаляется друг
-        #если там последний пользователь то чат удаляется
+                if room.participant.count() == 1:
+                    room.delete()
+                    return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
+                else:
+                    room.participant.remove(user)
+                    room.save()
+                    to_user = room.participant.all()[0]
+                    Friend.objects.remove_friend(user, to_user)
+                    return Response({"detail": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
         else:
-            if room.participant.count() == 1:
-                room.delete()
-                return Response({"detail": "Request accepted, room has been deleted"}, status.HTTP_201_CREATED)
-            else:
-                room.participant.remove(user)
-                room.save()
-                to_user = room.participant.all()[0]
-                Friend.objects.remove_friend(user, to_user)
-                return Response({"detail": "Request accepted, user deleted to room"}, status.HTTP_201_CREATED)
+            return Response({"detail": "Request rejected, the user is not in the chat"}, status.HTTP_400_BAD_REQUEST)
 
 
 class CreateChatRoomView(APIView):

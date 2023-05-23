@@ -11,8 +11,24 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = ('id', 'display_name', 'name', 'participant', 'type')
 
-class RoomSearchSerializer(serializers.Serializer):
+class RoomSearchMessageSerializer(serializers.Serializer):
     message = serializers.CharField(max_length = 100)
+
+
+class RoomSearchSerializer(serializers.ModelSerializer): 
+    room_user_type = serializers.SerializerMethodField()
+    class Meta:
+        model = Room
+        fields = ('id', 'display_name', 'name', 'room_user_type', 'type')
+
+    def get_room_user_type(self, obj):
+        user_my = self.context.get('user', None)
+        to_room_my = obj
+
+        if user_my in to_room_my.participant.all():
+            return str('your_chat')
+        else:
+            return str('new_chat')
 
 
 class RoomNameSerializer(serializers.Serializer):
