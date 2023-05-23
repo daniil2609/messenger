@@ -212,4 +212,16 @@ class EditNameChat(APIView):
                 return Response({"detail": "Request rejected, you can only add users to the common room"}, status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"detail": "Request rejected, room not found"}, status.HTTP_400_BAD_REQUEST)
+
+
+class GetParticipantRoom(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request):
+        """
+        Изменяет display_name чата
+        (нужно id чата)
+        """
+        name_chat=request.query_params['room_name']
+        partipicant = get_object_or_404(Room, name=name_chat).participant
+        return Response(serializers.UserSerializer(partipicant, many=True).data, status.HTTP_200_OK)
             

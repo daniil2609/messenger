@@ -10,5 +10,7 @@ urlpatterns = [
     path('create_room/', CreateChatRoomView.as_view(), name='create_room'),
     path('add_user/', AddUserInRoom.as_view(), name='add_user'),
     path('edit_name/', EditNameChat.as_view(), name='edit_name'),
+    path('partipicant/', GetParticipantRoom.as_view(), name='partipicant'),
+
 
 ]
