@@ -6,7 +6,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.generic.websocket import JsonWebsocketConsumer
-from .serializers import MessageSerializer, KanbanTaskSerializer
+from .serializers import MessageSerializer, KanbanTaskSerializer, RoomSerializer
+from src.users.serializers import UserSerializer
 from django.conf import settings
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
@@ -43,23 +44,23 @@ class ChatConsumer(WebsocketConsumer):
             self.channel_name,
         )
         self.accept()
-        #получаем 5 стартовых сообщений:
+        #выводим стартовые сообщения без прочитанного
         start_messages = Message.objects.filter(room = self.room).order_by('-pk')[:COUNT_PAGINATE]
-        #получаем все сообщения:
-        #start_messages = Message.objects.filter(room = self.room).order_by('-time_message')[:COUNT_PAGINATE]
         self.send(text_data=json.dumps(
             {
                 "type": "start_messages",
                 "message": MessageSerializer(start_messages, many=True).data
             }
         ))
+
         #добавляем пользователя в список онлайн и отправляем список
-        settings.REDIS_CLIENT.sadd(f'{self.room_name}_onlines', bytes(self.user.username, 'utf-8'))
+        settings.REDIS_CLIENT.sadd(f'{self.room_name}_onlines', bytes(self.user.email, 'utf-8'))
         self.send_online_user_list()
 
 
+
     def disconnect(self, code):
-        settings.REDIS_CLIENT.srem(f'{self.room_name}_onlines', bytes(self.user.username, 'utf-8'))
+        settings.REDIS_CLIENT.srem(f'{self.room_name}_onlines', bytes(self.user.email, 'utf-8'))
         self.send_online_user_list()
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
@@ -92,10 +93,11 @@ class ChatConsumer(WebsocketConsumer):
                 f'{self.room_name}_notifications',
                 {
                     "type": "notification",
-                    "room_name": self.room_name,
+                    "room": RoomSerializer(self.room).data,
                     "message": MessageSerializer(message).data,
                 },
             )
+            
 
         if message_type == "paginate_up":
             end_id = text_data_json['up_id']
@@ -107,7 +109,7 @@ class ChatConsumer(WebsocketConsumer):
                     "message": MessageSerializer(messages, many=True).data
                 }
             ))
-        
+        '''
         if message_type == "paginate_down":
             end_id = text_data_json['down_id']
             messages = Message.objects.filter(room=self.room, pk__gt=end_id).order_by('pk')[:COUNT_PAGINATE]
@@ -118,7 +120,8 @@ class ChatConsumer(WebsocketConsumer):
                     "message": MessageSerializer(messages, many=True).data
                 }
             ))
-      
+      '''
+        
     def chat_message(self, event):
         self.send(text_data=json.dumps({
             'type': 'chat_message',
@@ -126,11 +129,13 @@ class ChatConsumer(WebsocketConsumer):
         }))
 
     def send_online_user_list(self):
-        online_user_list = settings.REDIS_CLIENT.smembers(f'{self.room_name}_onlines')
+        redis_online_user_list = settings.REDIS_CLIENT.smembers(f'{self.room_name}_onlines')#достаем из redis
+        arr_online_user_list = [useremail.decode('utf-8') for useremail in redis_online_user_list]#декодируем
+        online_user_list = [User.objects.filter(email=i).first() for i in arr_online_user_list]#ищем пользователей в БД
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {
                 'type': 'online_users',
-                'users': [username.decode('utf-8') for username in online_user_list],
+                'users': UserSerializer(online_user_list, many=True).data,
             },
         )
         
@@ -174,7 +179,7 @@ class NotificationConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({
             'type': 'notification',
             'message': event['message'],
-            'room_name': event['room_name']       
+            'room': event['room'],
             }))
 
 
