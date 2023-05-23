@@ -1,8 +1,9 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const GetSearch = (message) => {
+const ExitChat = ({selectedChat}) => {
+    
+    
 
     const [csrfToken, setCsrfToken] = useState("");
     useEffect(() => {
@@ -13,39 +14,31 @@ const GetSearch = (message) => {
         setCsrfToken(cookieValue); //сохранение значение в состоянии компонента
       }, []);
 
-
-    const searching = () => {
-        axios.post("http://127.0.0.1:8000/api/v1/chat/search_room/", message, {
+    const exit = () => {
+        const data = {id: selectedChat.id}
+        console.log(data)
+        console.log(csrfToken)
+        axios.post("http://127.0.0.1:8000/api/v1/chat/delete_room/", data, {
                 headers: {
                     'X-CSRFToken': csrfToken
                 },
                 withCredentials: true
             })
             .then(responce => {
-                console.log(responce.data)
+                console.log("Успех!")
+                window.location.reload();
             })
             .catch(error => {
-                alert("Ошибка поиска")
+                console.log(error)
             })
             }
-
-
-        if (csrfToken && message) {
-            console.log(csrfToken)
-            console.log(message)
-            if (message.message === "") {}
-            else{
-            searching();
-            }
-            return (
-                <>
-                Готово!
-                </>
-            )
-        
+        return (
+            <>
+                <button className="form_button" style={{marginTop:"10px"}} onClick={exit}>Выйти из чата</button>
+            </>
+        )
     }
+
     
 
-}
-
-export default GetSearch
+export default ExitChat

@@ -3,9 +3,11 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import OpenChat from "./OpenChat";
 import SearchChats from './Searchchats'
-import InputModal from "./ModalRename";
+import ModuleRename from "./ModalRename";
 
-const ListChats = () =>{
+
+
+const ListChats = (props) =>{
     const [chatfriends, setChatFriends] = useState('')
     const [selectedChat, setSelectedChat] = useState(null);
     
@@ -89,7 +91,7 @@ const ListChats = () =>{
                                     }}
                                     className={`display_name ${selectedChat === chat ? 'selected' : ''}`}
                                     >
-                                         {chat.display_name}
+                                         {chat.display_name.replace(`_${props.user}`, '').replace(`${props.user}_`, '')}
                                     </li>
                                 )}
                             </ul>
@@ -100,8 +102,21 @@ const ListChats = () =>{
                             <>  
                             <div className="parrent_title">
                                 <div className="username_in_chat" style={{justifyContent:'center', marginTop:'10px'}}>{selectedChat.display_name}</div>
-                                <button onClick={openModal}>Переименовать</button>
-                                <InputModal isOpen={isModalOpen} onClose={closeModal} onSubmit={handleSubmit} selectedChat={selectedChat}/>
+                                {selectedChat.type > '1' ? (
+                                    <>
+                                        <button onClick={openModal} style={{
+                                            backgroundColor: "transparent", 
+                                            border: "none", 
+                                            cursor: "pointer",
+                                            fontSize: '20px',
+                                            marginTop: '8px'
+                                         }}>&#128257;</button>
+                                        <ModuleRename isOpen={isModalOpen} onClose={closeModal} onSubmit={handleSubmit} selectedChat={selectedChat}/>
+                                    </>
+                                ) : (
+                                    ""
+                                )
+                                }
                             </div>
                                 <div className="chat_messages">
                                     <OpenChat selectedChat={selectedChat}/>

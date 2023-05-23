@@ -39,7 +39,7 @@ const Searchchats = () =>{
 
     return(
         <>
-        <form className="form" style={{width: '350px', padding: '20px', marginTop: '10px', marginLeft:'10px'}}>
+        <form className="form" style={{width: '350px', padding: '20SearchGroupmopx', marginTop: '10px', marginLeft:'10px'}}>
             <div className="form_group" style={{display: 'flex'}}>
                 <input 
                 className="form_input"

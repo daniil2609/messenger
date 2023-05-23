@@ -1,9 +1,22 @@
-import React from "react"; 
+import React, { useState, useRef, useEffect } from "react";
 import HeaderPersonalPage from "../HeaderPersonalpage";
 import ListChats from "../ListChats"
 import useWebSocket from "react-use-websocket"; 
+import axios from "axios";
 
 const Chats = () => { 
+    const [user, setUser] = useState('')
+
+    useEffect(() => {
+        axios
+        .get("http://127.0.0.1:8000/api/v1/auth/me/", { withCredentials: true })
+        .then( response => {
+            //setData(response.data)
+            setUser(response.data.username)
+            console.log(response.data)
+        })
+        .catch (error => console.error(error));
+        }, []);
 
     //вебсокет для уведомлений: 
     const { readyStateNotifications } = useWebSocket("ws://127.0.0.1:8000/ws/chat/notifications/", { 
@@ -33,7 +46,7 @@ const Chats = () => {
     return(
         <>
         <HeaderPersonalPage/>
-        <ListChats/>
+        <ListChats user={user}/>
         </>
 
     )

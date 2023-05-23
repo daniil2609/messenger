@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const InputModal = ({ isOpen, onClose, onSubmit, selectedChat }) => {
+const ModuleRename = ({ isOpen, onClose, onSubmit, selectedChat }) => {
   const [inputValue, setInputValue] = useState({
     id: selectedChat.id,
     name: selectedChat.display_name
@@ -71,4 +71,4 @@ const InputModal = ({ isOpen, onClose, onSubmit, selectedChat }) => {
   );
 };
 
-export default InputModal;
+export default ModuleRename;

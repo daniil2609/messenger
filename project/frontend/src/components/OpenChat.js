@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react"; 
 import useWebSocket, { ReadyState } from "react-use-websocket"; 
-import axios from "axios";
 import KanbanBoard from './KanbanBoard'
+import SettingsMenu from "./SettingsMenu";
 
 export default function OpenChat(props) {
     const [onlineUsers, setOnlineUsers] = useState([]); 
@@ -89,16 +89,6 @@ export default function OpenChat(props) {
         } 
     }); 
 
-            //запрос на получение всех участников этой комнаты (закоментирован потому что выполняется много раз)
-            //  axios
-            //    .get(`http://127.0.0.1:8000/api/v1/chat/partipicant/?room_name=${props.selectedChat.name}`, { 
-            //        withCredentials: true, 
-            //    })
-            //    .then( response => {
-            //        setPartipicant(response.data)
-            //    })
-            //    .catch (error => console.error(error));
- 
     const connectionStatus = { 
         [ReadyState.CONNECTING]: "Connecting", 
         [ReadyState.OPEN]: "Open", 
@@ -121,9 +111,10 @@ export default function OpenChat(props) {
 
     return ( 
         <>
-            <KanbanBoard selectedChat={props.selectedChat}/>
             <div className="parrent_title" style={{justifyContent:'space-between'}}> Соединение: {' ' + connectionStatus}
+                <KanbanBoard selectedChat={props.selectedChat}/>
                 <button className="form_button" style={{height: '40px'}} onClick={OnlineMenu}>Онлайн</button>
+                <SettingsMenu selectedChat = {props.selectedChat}/>
             </div>
             
             <ul className="message_text" 

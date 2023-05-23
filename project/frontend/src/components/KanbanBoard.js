@@ -77,8 +77,6 @@ export default function KanbanBoard(props) {
         <>
             <div>
                 <div className="parrent_title" style={{justifyContent:'space-between'}}>KanbanBoard Соединение: {' ' + connectionStatus}</div>
-                <p>KanbanBoard</p>
-            
             </div>
         </>
     ); 
