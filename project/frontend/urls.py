@@ -13,5 +13,9 @@ urlpatterns = [
     path('personalpage/chats', views.index),
     path('personalpage/history/outgoing', views.index),
     path('personalpage/history/putgoing', views.index),
-    path('personalpage/history/rejected', views.index)
+    path('personalpage/history/rejected', views.index),
+
+    path('recovery_email_verify', views.index),
+    path('recovery_new_password/<uidb64>/<token>/', views.index),
+
 ]

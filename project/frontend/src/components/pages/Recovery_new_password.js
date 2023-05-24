@@ -1,16 +1,17 @@
 import React, {useState, useEffect} from "react"
-import { useNavigate, Link } from "react-router-dom" 
+import { useNavigate } from "react-router-dom" 
 import axios from "axios"
 import HeaderHomePage from "../HeaderHomepage"
 
-const Authorization = () => {
+const Recovery_new_password = () => {
+    const query = window.location.pathname.split('/')
+    const uidb64 = query[2]
+    const token = query[3]
+    const navigate = useNavigate();
     //создание formData с помощью хука Реакта - useState 
     const [formData, setFormData] = useState({
-        email: "",
-        password: ""
+        password: "",
     });
-
-    const navigate = useNavigate();
 
     const [csrfToken, setCsrfToken] = useState("");
     useEffect(() => {
@@ -35,62 +36,53 @@ const Authorization = () => {
         e.preventDefault();
         console.log(formData)
         console.log('X-CSRF-Token: ' + csrfToken)
-        axios.post("http://127.0.0.1:8000/api/v1/auth/login/", formData, {
+        try{
+        axios.post(`http://127.0.0.1:8000/api/v1/auth/new_password/${uidb64}/${token}/`, formData, {
                 headers: {
                     'X-CSRFToken': csrfToken
                 },
                 withCredentials: true
             })
-            .then(responce => {
-                if (responce.data.detail = "Successfully logged in."){
-                    navigate("/personalpage/chats")
+            .then((responce) => {
+                console.log(responce.data.detail)
+                if (responce.data.detail = "Successfully recovery password"){
+                    navigate("/sign_in")
+                    alert("Пароль был успешно изменен")
                 }
             })
-            .catch(function(error) {
-                if (error.message = "Request failed with status code 403"){
-                    console.log("Ошибка авторизации")
-                }
-            })
+        }
+        catch (error) {
+            console.error(error)
+            navigate("/sign_in")
+            alert("Что то пошло не так")
+        }
+
             }
     return (
         <>
         <HeaderHomePage/>
         <div className="moving">
             <form onSubmit={hadleSubmit} className="form">
-            <div className="form_title">Авторизация</div>
+            <div className="form_title">Введите новый пароль</div>
             <div className="form_group">
                     <input
                     className="form_input" 
                     type="text" 
-                    id="email" 
-                    name="email" 
-                    placeholder=" "
-                    value={formData.email}
-                    onChange={handleChange}
-                    />
-                    <label htmlFor="email" className="form_label">Почта</label>
-            </div>
-            <div className="form_group">        
-                    <input
-                    className="form_input" 
-                    type="text" 
                     id="password" 
-                    name="password"
+                    name="password" 
                     placeholder=" "
                     value={formData.password}
                     onChange={handleChange}
                     />
-                    <label htmlFor="password" className="form_label">Пароль</label>
+                    <label htmlFor="email" className="form_label">Новый пароль</label>
             </div>
             <div className="parent_button">
-                <input type="submit" value="Войти" className="form_button"/>
+                <input type="submit" value="Продолжить" className="form_button"/>
             </div>
-            <Link to="/recovery_email_verify">Забыли пароль...</Link>
             </form>
-                
             </div>
             </>
     )
 }
 
-export default Authorization
+export default Recovery_new_password

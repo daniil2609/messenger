@@ -1,16 +1,13 @@
 import React, {useState, useEffect} from "react"
-import { useNavigate, Link } from "react-router-dom" 
+import { useNavigate } from "react-router-dom" 
 import axios from "axios"
 import HeaderHomePage from "../HeaderHomepage"
 
-const Authorization = () => {
+const Recovery_email_verify = () => {
     //создание formData с помощью хука Реакта - useState 
     const [formData, setFormData] = useState({
         email: "",
-        password: ""
     });
-
-    const navigate = useNavigate();
 
     const [csrfToken, setCsrfToken] = useState("");
     useEffect(() => {
@@ -35,20 +32,20 @@ const Authorization = () => {
         e.preventDefault();
         console.log(formData)
         console.log('X-CSRF-Token: ' + csrfToken)
-        axios.post("http://127.0.0.1:8000/api/v1/auth/login/", formData, {
+        axios.post("http://127.0.0.1:8000/api/v1/auth/recovery_email/", formData, {
                 headers: {
                     'X-CSRFToken': csrfToken
                 },
                 withCredentials: true
             })
             .then(responce => {
-                if (responce.data.detail = "Successfully logged in."){
-                    navigate("/personalpage/chats")
+                if (responce.data.detail = "An email has been sent to you with further instructions"){
+                    alert("Вам на почту пришло письмо с дальнейшими инструкциями для восстановления пароля");
                 }
             })
             .catch(function(error) {
                 if (error.message = "Request failed with status code 403"){
-                    console.log("Ошибка авторизации")
+                    alert("Похоже такого пользователя не существует")
                 }
             })
             }
@@ -57,7 +54,7 @@ const Authorization = () => {
         <HeaderHomePage/>
         <div className="moving">
             <form onSubmit={hadleSubmit} className="form">
-            <div className="form_title">Авторизация</div>
+            <div className="form_title">Введите email для востановления пароля</div>
             <div className="form_group">
                     <input
                     className="form_input" 
@@ -70,27 +67,13 @@ const Authorization = () => {
                     />
                     <label htmlFor="email" className="form_label">Почта</label>
             </div>
-            <div className="form_group">        
-                    <input
-                    className="form_input" 
-                    type="text" 
-                    id="password" 
-                    name="password"
-                    placeholder=" "
-                    value={formData.password}
-                    onChange={handleChange}
-                    />
-                    <label htmlFor="password" className="form_label">Пароль</label>
-            </div>
             <div className="parent_button">
-                <input type="submit" value="Войти" className="form_button"/>
+                <input type="submit" value="Продолжить" className="form_button"/>
             </div>
-            <Link to="/recovery_email_verify">Забыли пароль...</Link>
             </form>
-                
             </div>
             </>
     )
 }
 
-export default Authorization
+export default Recovery_email_verify

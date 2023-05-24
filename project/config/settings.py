@@ -192,6 +192,7 @@ CORS_ALLOW_CREDENTIALS = True
 #перенаправление после подтверждения email
 SUCCEFULLY_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/sign_in'
 ERROR_EMAIL_VERIFY_REDIRECT = 'http://127.0.0.1:8000/'
+SUCCEFULLY_PASSWORD_RECOVERY_REDIRECT = 'http://127.0.0.1:8000/recovery_new_password'
 
 #настройки передачи csrf токенов (подходит для сессионной аутентификации)
 CSRF_COOKIE_SAMESITE = 'Strict'

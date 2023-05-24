@@ -32,3 +32,14 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'last_name', 'phone_number')
 
+
+class RecoveryEmailSerializer(serializers.Serializer):
+    """ Сериализация почты от востановления пароля
+    """
+    email = serializers.EmailField()
+
+class RecoveryPasswordSerializer(serializers.Serializer):
+    """ Сериализация нового пароля
+    """
+    password = serializers.CharField()
+
