@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ShowMenu from "./ShowMenu";
 import ExitChat from "./ExitChat";
 
-const ContenSettings = ({ isOpen, onClose, selectedChat }) => {
+const ContenSettings = ({ isOpen, onClose, selectedChat, onlineUsers }) => {
 
   const closed = (event) => {
     event.preventDefault();
@@ -44,7 +44,7 @@ const ContenSettings = ({ isOpen, onClose, selectedChat }) => {
             style={{ flexDirection: "column", padding: "10px" }}
           >
             <div onClick={(event) => event.stopPropagation()}>
-            <ShowMenu selectedChat={selectedChat}/>
+            <ShowMenu selectedChat={selectedChat} onlineUsers={onlineUsers}/>
             </div>
             {selectedChat.type > '1' ? (<>
               <button className="form_button" style={{ marginTop: "10px" }}>

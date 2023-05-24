@@ -41,9 +41,7 @@ export default function OpenChat(props) {
     }
 
     const OnlineMenu = () => {
-        const users = onlineUsers;
-        const arrayString = users.join("\n");
-        alert("В сети: \n" + arrayString);
+        console.log(onlineUsers);
       };
 
 
@@ -114,7 +112,7 @@ export default function OpenChat(props) {
             <div className="parrent_title" style={{justifyContent:'space-between'}}> Соединение: {' ' + connectionStatus}
                 <KanbanBoard selectedChat={props.selectedChat}/>
                 <button className="form_button" style={{height: '40px'}} onClick={OnlineMenu}>Онлайн</button>
-                <SettingsMenu selectedChat = {props.selectedChat}/>
+                <SettingsMenu selectedChat = {props.selectedChat} onlineUsers = {onlineUsers}/>
             </div>
             
             <ul className="message_text" 

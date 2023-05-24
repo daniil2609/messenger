@@ -2,7 +2,7 @@ import { useState } from "react";
 import React from "react";
 import ContenSettings from "./ContentSettings";
 
-const SettingsMenu = ({selectedChat}) => {
+const SettingsMenu = ({selectedChat, onlineUsers}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const openModal = () => {
@@ -16,7 +16,7 @@ const SettingsMenu = ({selectedChat}) => {
     return(
         <>
         <button className="form_button" onClick={openModal}>&equiv;</button>
-        <ContenSettings isOpen={isModalOpen} onClose={closeModal} selectedChat = {selectedChat}/>
+        <ContenSettings isOpen={isModalOpen} onClose={closeModal} selectedChat = {selectedChat} onlineUsers = {onlineUsers}/>
         </>
     )
 }
