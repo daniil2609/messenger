@@ -12,7 +12,10 @@ from django.shortcuts import redirect
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, login, get_user_model, logout
 from django.conf import settings
-from django.http import JsonResponse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator as \
+    token_generator
 
 
 @api_view(["POST"])
@@ -127,3 +130,48 @@ def session_view(request):
     #return Response({'isAuthenticated: True'}, status=status.HTTP_200_OK)
         return Response({'detail': False}, status=status.HTTP_200_OK)
     return Response({'detail': True}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def user_recovery(request):
+    """ Востановление учетной записи (проверка email)
+    """
+    data = serializers.RecoveryEmailSerializer(data=request.data)
+    if data.is_valid():
+        user = User.objects.filter(email=data.validated_data['email']).first()
+        if user is None:
+            return Response({'detail': 'User is not defined'}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            send_email_verify.send_email_for_recovery(request, user)
+            return Response({'detail': 'An email has been sent to you with further instructions'}, status=status.HTTP_201_CREATED)
+    else:
+        return Response({'detail': 'Bad email'}, status=status.HTTP_403_FORBIDDEN)
+    
+
+@api_view(["POST"])
+def new_password(request, uidb64, token):
+    """ Востановление учетной записи (изменение пароля)
+    """
+    user = EmailVerify.get_user(uidb64)
+    if user is not None and default_token_generator.check_token(user, token):
+        data = serializers.RecoveryPasswordSerializer(data=request.data)
+        if data.is_valid():
+            new_password=data.validated_data['password']
+            user.set_password(new_password)
+            user.save()
+            return Response({'detail': 'Successfully recovery password'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Bad password'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'detail': 'Bad token or user'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordRecoveryView(View):
+    def get(self, request, uidb64, token):
+        user = EmailVerify.get_user(uidb64)
+        if user is not None and default_token_generator.check_token(user, token):
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token_out = token_generator.make_token(user)
+            return redirect(settings.SUCCEFULLY_PASSWORD_RECOVERY_REDIRECT + '/' + uid + '/' + token_out + '/')
+        return redirect(settings.ERROR_EMAIL_VERIFY_REDIRECT)
+    

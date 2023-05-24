@@ -10,6 +10,8 @@ import SearchFriends from './pages/Searchfriends';
 import Outgoing from './pages/Outgoing';
 import Putgoing from './pages/Putgoing';
 import Rejected from './pages/Rejected';
+import Recovery_email_verify from './pages/Recovery_email_verify';
+import Recovery_new_password from './pages/Recovery_new_password';
 
 
 
@@ -28,6 +30,9 @@ function App() {
             <Route path="/personalpage/history/outgoing" element={<Outgoing/>}/>
             <Route path="/personalpage/history/putgoing" element={<Putgoing/>}/>
             <Route path="/personalpage/history/rejected" element={<Rejected/>}/>
+
+            <Route path="/recovery_email_verify" element={<Recovery_email_verify/>}/>
+            <Route path="/recovery_new_password/:uidb64/:token" element={<Recovery_new_password/>}/>
         </Routes>
         </BrowserRouter>
 
