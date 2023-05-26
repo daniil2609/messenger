@@ -1,5 +1,6 @@
 # chat/consumers.py
 import json
+from . utils import encrypt
 from .models import Room, Message, Task
 from src.users.models import User
 from asgiref.sync import async_to_sync
@@ -58,7 +59,6 @@ class ChatConsumer(WebsocketConsumer):
         self.send_online_user_list()
 
 
-
     def disconnect(self, code):
         settings.REDIS_CLIENT.srem(f'{self.room_name}_onlines', bytes(self.user.email, 'utf-8'))
         self.send_online_user_list()
@@ -72,7 +72,7 @@ class ChatConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message_type = text_data_json["type"]
         if message_type == "chat_message":
-            message_text = text_data_json['message']
+            message_text = encrypt(text_data_json['message']) #шифруем сообщение
             message = Message.objects.create(
                 user=self.user,
                 room=self.room,
@@ -98,7 +98,6 @@ class ChatConsumer(WebsocketConsumer):
                 },
             )
             
-
         if message_type == "paginate_up":
             end_id = text_data_json['up_id']
             messages = Message.objects.filter(room=self.room, pk__lt=end_id).order_by('-pk')[:COUNT_PAGINATE]
@@ -183,8 +182,6 @@ class NotificationConsumer(WebsocketConsumer):
             }))
 
 
-
-
 class KanbanBoardConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
@@ -230,7 +227,7 @@ class KanbanBoardConsumer(WebsocketConsumer):
         message_type = text_data_json["type"]
         if message_type == "add":
             type_task = text_data_json['type_task']
-            name_task = text_data_json['name_task']
+            name_task = (text_data_json['name_task'], None)
             description_task = text_data_json['description_task']
             if type_task == "ToDo":
                 name_board = 1
@@ -242,13 +239,17 @@ class KanbanBoardConsumer(WebsocketConsumer):
                 name_board = 4
             else:
                 name_board = 1
-            Task.objects.create(
-                owner=self.room,
-                board_name=name_board,
-                name=name_task,
-                description=description_task
-            )
-            self.send_all_board()
+            if name_task != None:
+                encrypt_name_task = encrypt(name_task)#encrypt для шифрования
+                Task.objects.create(
+                    owner=self.room,
+                    board_name=name_board,
+                    name=encrypt_name_task,
+                    description=encrypt(description_task)#encrypt для шифрования
+                )
+                self.send_all_board()
+            else:
+                self.send_error('You must specify the name of the task')
 
         if message_type == "delete":
             id_task = text_data_json['id_task']
@@ -257,13 +258,16 @@ class KanbanBoardConsumer(WebsocketConsumer):
 
         if message_type == "edit":
             id_task = text_data_json['id_task']
-            new_name_task = text_data_json['new_name_task']
-            new_description_task = text_data_json['new_description_task']
-            if new_name_task != "":
-                Task.objects.filter(pk=id_task).update(name=new_name_task)
-            if new_description_task != "":
-                Task.objects.filter(pk=id_task).update(description=new_description_task)
-            self.send_all_board()
+            new_name_task = (text_data_json['new_name_task'], None)
+            new_description_task = (text_data_json['new_description_task'], None)
+            if new_description_task == None and new_name_task == None:
+                self.send_error('To edit, you need at least one thing')
+            else:
+                if new_name_task != "":
+                    Task.objects.filter(pk=id_task).update(name=encrypt(new_name_task))#encrypt для шифрования
+                if new_description_task != "":
+                    Task.objects.filter(pk=id_task).update(description=encrypt(new_description_task))#encrypt для шифрования
+                self.send_all_board()
 
         if message_type == "move":
             id_task = text_data_json['id_task']
@@ -301,5 +305,11 @@ class KanbanBoardConsumer(WebsocketConsumer):
             'InProgress': event['InProgress'],
             'Review': event['Review'],
             'Done': event['Done'],
+            }))
+    
+    def send_error(self, message):
+        self.send(text_data=json.dumps({
+            'type': 'Kanban_error',
+            'message': message,
             }))
 

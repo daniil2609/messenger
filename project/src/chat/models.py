@@ -14,7 +14,7 @@ class Room(models.Model):
     display_name = models.CharField(max_length=128, blank=True, null=True)
     name = models.CharField(max_length=128, unique=True)
     participant = models.ManyToManyField(User, blank=False)
-    type = models.CharField(max_length=2, choices=RoomType.choices)    
+    type = models.CharField(max_length=32, choices=RoomType.choices)    
 
     def __str__(self):
         return str(self.name)
@@ -35,7 +35,7 @@ class Task(models.Model):
         Review = 3, 'На проверке'
         Done = 4, 'Выполнено'
     owner = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='tasks')
-    board_name = models.CharField(max_length=12, choices=boardNames.choices, default=boardNames.ToDo)
+    board_name = models.CharField(max_length=32, choices=boardNames.choices, default=boardNames.ToDo)
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=500, blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True)
