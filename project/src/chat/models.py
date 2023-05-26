@@ -36,7 +36,7 @@ class Task(models.Model):
         Done = 4, 'Выполнено'
     owner = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='tasks')
     board_name = models.CharField(max_length=32, choices=boardNames.choices, default=boardNames.ToDo)
-    name = models.CharField(max_length=128)
-    description = models.CharField(max_length=500, blank=True, null=True)
+    name = models.CharField(max_length=256)
+    description = models.CharField(max_length=2048, blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True)
 

@@ -240,13 +240,14 @@ class KanbanBoardConsumer(WebsocketConsumer):
                 name_board = 4
             else:
                 name_board = 1
-            if name_task != None:
-                encrypt_name_task = encrypt(name_task)#encrypt для шифрования
+            encrypt_name_task = encrypt(name_task)#encrypt для шифрования
+            encrypt_description_task = encrypt(description_task)#encrypt для шифрования
+            if name_task != None and len(name_task)<=128 and len(description_task)<=1024:
                 Task.objects.create(
                     owner=self.room,
                     board_name=name_board,
                     name=encrypt_name_task,
-                    description=encrypt(description_task)#encrypt для шифрования
+                    description=encrypt_description_task
                 )
                 self.send_all_board()
             else:
