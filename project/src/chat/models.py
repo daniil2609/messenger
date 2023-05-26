@@ -23,7 +23,7 @@ class Room(models.Model):
 class Message(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages_creator')
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    text = models.CharField(blank=False, null=False, max_length=1024)
+    text = models.CharField(blank=False, null=False, max_length=2048)
     read_users = models.ManyToManyField(User, related_name='messages_read_users')
     time_message = models.DateTimeField(auto_now_add=True)
 

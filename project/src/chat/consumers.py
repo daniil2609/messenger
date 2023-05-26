@@ -68,36 +68,37 @@ class ChatConsumer(WebsocketConsumer):
         )
 
     def receive(self, text_data):
-        #self.send_online_user_list()
         text_data_json = json.loads(text_data)
         message_type = text_data_json["type"]
         if message_type == "chat_message":
-            message_text = encrypt(text_data_json['message']) #шифруем сообщение
-            message = Message.objects.create(
-                user=self.user,
-                room=self.room,
-                text=message_text,
-            )
-            message.read_users.add(self.user)
-            message.save()
+            text = text_data_json['message']
+            message_text = encrypt(text) #шифруем сообщение
+            if len(text)<=1024 and len(message_text)<=2048:#проверяем длину сообщения
+                message = Message.objects.create(
+                    user=self.user,
+                    room=self.room,
+                    text=message_text,
+                )
+                message.read_users.add(self.user)
+                message.save()
+                #отправляем сообщение всем участникам группы
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        "type": "chat_message",
+                        "message": MessageSerializer(message).data,
+                    },
+                )
+                #отправляем сообщение всем участникам группы уведомлений
+                async_to_sync(self.channel_layer.group_send)(
+                    f'{self.room_name}_notifications',
+                    {
+                        "type": "notification",
+                        "room": RoomSerializer(self.room).data,
+                        "message": MessageSerializer(message).data,
+                    },
+                )
 
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name,
-                {
-                    "type": "chat_message",
-                    "message": MessageSerializer(message).data,
-                },
-            )
-
-            async_to_sync(self.channel_layer.group_send)(
-                f'{self.room_name}_notifications',
-                {
-                    "type": "notification",
-                    "room": RoomSerializer(self.room).data,
-                    "message": MessageSerializer(message).data,
-                },
-            )
-            
         if message_type == "paginate_up":
             end_id = text_data_json['up_id']
             messages = Message.objects.filter(room=self.room, pk__lt=end_id).order_by('-pk')[:COUNT_PAGINATE]
