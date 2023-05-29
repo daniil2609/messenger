@@ -16,6 +16,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator as \
     token_generator
+from src.chat.models import Room
 
 
 @api_view(["POST"])
@@ -82,12 +83,22 @@ class UserView(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
-        last_email = User.objects.get(pk=instance.id)
+        user = User.objects.get(pk=instance.id)
+        old_username = user.username
         email = serializer.validated_data['email']
-        if last_email.email != email:
-            last_email.email = email
+        new_username = serializer.validated_data['username']
+        #если изменяется email высылаем подтверждение
+        if user.email != email:
+            user.email = email
             serializer.validated_data['email_verify'] = False
-            send_email_verify.send_email_for_verify(request, last_email)
+            send_email_verify.send_email_for_verify(request, user)
+        #если изменяется имя переминовываем все display_name в личных чатах
+        if user.username != new_username:
+            ls_all = Room.objects.filter(type = 1, participant=self.request.user.pk)
+            for ls in ls_all:
+                ls.display_name = ls.display_name.replace(old_username, new_username)
+                ls.save()
+
         self.perform_update(serializer)
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}

@@ -1,5 +1,5 @@
 from .views import *
-from django.urls import path, include
+from django.urls import path
 
 
 urlpatterns = [
@@ -11,6 +11,5 @@ urlpatterns = [
     path('add_user/', AddUserInRoom.as_view(), name='add_user'),
     path('edit_name/', EditNameChat.as_view(), name='edit_name'),
     path('partipicant/', GetParticipantRoom.as_view(), name='partipicant'),
-
 
 ]

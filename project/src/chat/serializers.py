@@ -12,9 +12,6 @@ class RoomSerializer(serializers.ModelSerializer):
         model = Room
         fields = ('id', 'display_name', 'name', 'participant', 'type')
 
-class RoomSearchMessageSerializer(serializers.Serializer):
-    message = serializers.CharField(max_length = 100)
-
 
 class RoomSearchSerializer(serializers.ModelSerializer): 
     room_user_type = serializers.SerializerMethodField()

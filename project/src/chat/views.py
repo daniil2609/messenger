@@ -1,44 +1,47 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework import status, viewsets, permissions
-from rest_framework.decorators import action
+from rest_framework import status, permissions, generics
 from rest_framework.response import Response
-from django.shortcuts import render
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from . import serializers
-from .models import Room, Message
-from rest_framework import generics, viewsets, parsers, views
+from .models import Room
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from transliterate import slugify
-import re
+from .utils import generate_unique_name_room
 from friendship.models import Friend
+from rest_framework.pagination import PageNumberPagination
 
 
 User = get_user_model()
+
+
+class ResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class ListRoomView(generics.ListAPIView):
     """ Список всех чатов пользователя
     """
     serializer_class = serializers.RoomSerializer
     permission_classes = [permissions.IsAuthenticated]
+    #pagination_class = ResultsSetPagination
 
     def get_queryset(self):
-        return Room.objects.filter(participant=self.request.user.pk)
+        return Room.objects.filter(participant=self.request.user.pk).order_by('type', 'display_name')
 
 
 
 class SearchChatRoomView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    def post(self, request):
+
+    def get(self, request):
         """
         Ищет в базе комнаты чатов по запросу
         Возвращает список из 20(max) подходящих записей
         """
-        serializer = serializers.RoomSearchMessageSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        message=serializer.validated_data.get('message')
+        message=request.query_params['message']
         #поиск и своих и новых чатов
         #search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2))[:20]
         search_results = Room.objects.filter(Q(name__icontains=message, type=2) | Q(display_name__icontains=message, type=2)).exclude(participant=request.user)[:20]
@@ -111,32 +114,10 @@ class CreateChatRoomView(APIView):
         serializer.is_valid(raise_exception=True)
         name_chat = serializer.validated_data.get('name')
         type_chat = serializer.validated_data.get('type')
-
-        #проверяем есть ли русские буквы в названии чата
-        def is_cyrrylic(symb):
-            return True if u'\u0400' <= symb <=u'\u04FF' or u'\u0500' <= symb <= u'\u052F' else False
-        rus = False
-        for i in name_chat:
-            a = is_cyrrylic(i)
-            if a == True:
-                rus = True
-                break
-        #если есть транслитерируем имя
-        if rus:
-            disp_name = name_chat
-            url_name = slugify(name_chat)
-            url_name = url_name.replace('-', '_')
-        else:
-            disp_name = name_chat
-            url_name = name_chat
-        #создаем неповторяющеесе имя чата добавляя счетчик
-        c = 1
-        while Room.objects.filter(name=url_name).first() is not None:
-            if c == 1:
-                url_name = url_name+str(c)
-            else:
-                url_name = re.sub(r'[^\w\s]+|[\d]+', r'', url_name).strip()+str(c)
-            c+=1
+        #задаем display_name
+        disp_name = name_chat
+        #генерируем уникальное имя
+        url_name = generate_unique_name_room(name_chat)
         #создаем комнату
         user = get_object_or_404(User, pk=request.user.pk)
         if type_chat == '2':
