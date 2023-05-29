@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket"; 
 import KanbanBoard from './KanbanBoard'
 import SettingsMenu from "./SettingsMenu";
+import InChat from "./InChat";
 
 export default function OpenChat(props) {
     const [onlineUsers, setOnlineUsers] = useState([]); 
@@ -39,11 +40,6 @@ export default function OpenChat(props) {
         setOnlineUsers([]);
         setUpId(0)
     }
-
-    const OnlineMenu = () => {
-        console.log(onlineUsers);
-      };
-
 
     //для чата: 
      const { readyState, sendJsonMessage } = useWebSocket(`ws://127.0.0.1:8000/ws/chat/room/${props.selectedChat.name}/`, { 
@@ -111,7 +107,6 @@ export default function OpenChat(props) {
         <>
             <div className="parrent_title" style={{justifyContent:'space-between'}}> Соединение: {' ' + connectionStatus}
                 <KanbanBoard selectedChat={props.selectedChat}/>
-                <button className="form_button" style={{height: '40px'}} onClick={OnlineMenu}>Онлайн</button>
                 <SettingsMenu selectedChat = {props.selectedChat} onlineUsers = {onlineUsers}/>
             </div>
             
@@ -128,7 +123,9 @@ export default function OpenChat(props) {
                     </form>
                 ))} 
             </ul> 
-
+            {props.selectedChat.room_user_type === 'new_chat' ? (<>
+                <InChat selectedChat={props.selectedChat}/>
+            </>) : (<>
             <div className="parrent_title">
             <form className="form" style={{width: '350px', height: '45px', padding: '20px'}}>
             <div className="form_group" style={{display: 'flex'}}>
@@ -146,6 +143,8 @@ export default function OpenChat(props) {
           </div>
         </form>
         </div>
+        </>)}
+            
             </>
     ); 
 }

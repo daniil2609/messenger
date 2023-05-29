@@ -53,7 +53,7 @@ const Friends = () => {
                         <div className="form_group"> Почта:
                             {friendData.email}
                         </div>
-                        <DelFriend friendData={friendData}/>
+                        <DelFriend friendData={friendData} setFriends={setFriends}/>
                 </form>
             ))}
             </div>

@@ -1,19 +1,17 @@
 import React, {useState} from "react";
 import AddGroupChat from "./AddGroupChat";
-import GetSearch from "./GetSearch";
 
-const Searchchats = () =>{
+const Searchchats = ({setSearching, handleSearchValue, searchValue}) =>{
 
     const [isOpen, setIsOpen] = useState(false);
     const [sign, setSign] = useState("+")
-    const [isSearch, setIsSearch] = useState(false);
     const [signSearch, setSignSearch] = useState("Поиск");
-    const [searchValue, setSearchValue] = useState({
-      message: "",
-  });
 
     const handleSearchChange = (event) => {
-      setSearchValue(event.target.value);
+      handleSearchValue({
+        ...searchValue,
+        [event.target.name]: event.target.value
+      });
     };
 
     const AddGroup = () => {
@@ -28,19 +26,21 @@ const Searchchats = () =>{
 
     const SearchGroup = () => {
       if (signSearch === "Поиск") {
+        setSearching(true); 
         setSignSearch("Назад");
-        setIsSearch(!isOpen);
-        } else {
-          setSignSearch("Поиск");
-          setIsSearch(false);
-        }
-  }
+        handleSearchValue(searchValue);
+      } else {
+        document.getElementById("message").value = ""
+        setSearching(false); 
+        setSignSearch("Поиск");
+      }
+    };
     
 
     return(
         <>
         <form className="form" style={{width: '350px', padding: '20SearchGroupmopx', marginTop: '10px', marginLeft:'10px'}}>
-            <div className="form_group" style={{display: 'flex'}}>
+            <div id='input_error' className="form_group" style={{display: 'flex'}}>
                 <input 
                 className="form_input"
                 type="text" 
@@ -56,7 +56,6 @@ const Searchchats = () =>{
         </form>
 
         {isOpen && (<AddGroupChat/>)}
-        {isSearch && (<GetSearch message={searchValue}/>)}
         </>
 
     )

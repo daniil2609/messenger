@@ -19,16 +19,6 @@ const SearchFriends = () => {
 
     const [searching, setSearching] = useState(false)
 
-    const [csrfToken, setCsrfToken] = useState("");
-    useEffect(() => {
-        const cookieValue = document.cookie //получаем все cookie в виде строки
-        .split(';') //разбитие строки на массив из строк 
-        .find(row => row.startsWith('csrftoken=')) //поиск cookie с названием csrftoken 
-        ?.split('=')[1]; //получение значение токена
-    
-        setCsrfToken(cookieValue); //сохранение значение в состоянии компонента
-      }, []);
-
       const handleChange = e => {
         setFormData({
             ...formData,
@@ -38,11 +28,7 @@ const SearchFriends = () => {
 
         const hadleSubmit = e => {
             e.preventDefault();
-            console.log('X-CSRF-Token: ' + csrfToken)
-            axios.post("http://127.0.0.1:8000/api/v1/friend/search_friends/", formData, {
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    },
+            axios.get(`http://127.0.0.1:8000/api/v1/friend/search_friends/?message=${formData.message}`, {
                     withCredentials: true
                 })
                 .then(responce => {

@@ -20,7 +20,7 @@ const ShowMenu = ({ selectedChat, onlineUsers }) => {
         setMembers1(members1);
         setMembers2(members2);
         setIsShow(!isShow);
-        setData(response.data)
+        setData(response.data);
       })
       .catch((error) => console.error(error));
   };
@@ -31,7 +31,6 @@ const ShowMenu = ({ selectedChat, onlineUsers }) => {
   
     for (let i = 0; i < data.length; i++) {
       let found = false;
-  
       for (let j = 0; j < onlineUsers.length; j++) {
         if (data[i].username === onlineUsers[j].username) {
           members1.push(data[i].username);

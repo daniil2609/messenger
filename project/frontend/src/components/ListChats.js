@@ -2,18 +2,29 @@ import React from "react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import OpenChat from "./OpenChat";
-import SearchChats from './Searchchats'
-import ModuleRename from "./ModalRename";
-
-
+import Searchchats from "./Searchchats";
+import ModuleRename from "./ModulRename";
+import GetSearch from "./GetSearch";
 
 const ListChats = (props) =>{
     const [chatfriends, setChatFriends] = useState('')
     const [selectedChat, setSelectedChat] = useState(null);
-    
+    const [searhing, setSearching] = useState(false);
+    const [searchValue, setSearchValue] = useState({
+        message: "",
+    });
+
+    const handleSearchValue = (value) => {
+        setSearchValue(value); 
+      };
+
     const handleChatClick = (index, event) => {
         event.preventDefault();
         setSelectedChat(chatfriends[index])
+    }
+
+    const changeSelected = (value) => {
+        setSelectedChat(value);
     }
     
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,25 +74,14 @@ const ListChats = (props) =>{
             .catch (error => console.error(error));
         }, []);
 
-        if (chatfriends.length === 0){
-            return (
-                <>
-                <SearchChats/>
-                <div className="form-wrapper">
-                <form className="form" style={{height: '40px', textAlign: 'center'}}>
-                        <div className="form_group" > Список чатов пуст</div>
-                </form>
-                </div>
-                </>
-            )
-        }
-        else{
+        if (chatfriends.length > 0){
             return(
                 <>
                     <div className="container">
                         <div> 
-                        <SearchChats/>
-                        <form className="form" style={{width: '350px', padding: '20px', marginTop: '10px', marginLeft:'10px'}}>
+                        <Searchchats setSearching={setSearching} handleSearchValue={handleSearchValue} searchValue={searchValue}/>
+                        {!searhing && 
+                            <form className="form" style={{width: '350px', padding: '20px', marginTop: '10px', marginLeft:'10px'}}>
                             <ul className="names_list">
                                 {chatfriends.map((chat, index) =>
                                     <li 
@@ -96,13 +96,15 @@ const ListChats = (props) =>{
                                 )}
                             </ul>
                         </form>
+                        }
+                        {searhing && <GetSearch selectedChat={selectedChat} searchValue={searchValue} changeSelected={changeSelected}/>}
                         </div>
-                        <div className="chat">
+                        <div className="chat" >
                             {selectedChat ? (
                             <>  
                             <div className="parrent_title">
                                 <div className="username_in_chat" style={{justifyContent:'center', marginTop:'10px'}}>{selectedChat.display_name}</div>
-                                {selectedChat.type > '1' ? (
+                                {(selectedChat.type > '1' && selectedChat.room_user_type !== "new_chat") ? (
                                     <>
                                         <button onClick={openModal} style={{
                                             backgroundColor: "transparent", 
@@ -123,10 +125,23 @@ const ListChats = (props) =>{
                                 </div>
                             </>
                             ) : (
-                            <div className="no-chat-selected">Чат не выбран</div>
+                            <div className="no-chat-selected">Чат не выбран!</div>
                             )}
                         </div>
                     </div>
+                </>
+            )
+        }
+        else{
+            return (
+                <>
+                <Searchchats setSearching={setSearching}/>
+                {!searhing && 
+                <div className="form-wrapper">
+                <form className="form" style={{height: '40px', textAlign: 'center'}}>
+                        <div className="form_group" > Список чатов пуст</div>
+                </form>
+                </div>}
                 </>
             )
         }

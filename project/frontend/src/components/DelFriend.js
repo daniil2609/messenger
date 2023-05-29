@@ -32,6 +32,11 @@ const DelFriend = (props) =>{
                 },
                 withCredentials: true
             })
+            props.setFriends((prev)=>{
+                return prev.filter((elem)=> 
+                    elem.email !== emailD
+                )
+            });
             console.log(response)
         }
         catch (error) {

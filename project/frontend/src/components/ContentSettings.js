@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ShowMenu from "./ShowMenu";
 import ExitChat from "./ExitChat";
+import ShowForAdd from "./ShowForAdd";
 
 const ContenSettings = ({ isOpen, onClose, selectedChat, onlineUsers }) => {
 
@@ -46,12 +47,12 @@ const ContenSettings = ({ isOpen, onClose, selectedChat, onlineUsers }) => {
             <div onClick={(event) => event.stopPropagation()}>
             <ShowMenu selectedChat={selectedChat} onlineUsers={onlineUsers}/>
             </div>
-            {selectedChat.type > '1' ? (<>
-              <button className="form_button" style={{ marginTop: "10px" }}>
-              Добавить участников
-              </button>
+            {(selectedChat.type > '1' && selectedChat.room_user_type !== "new_chat") ? (<>
+            <div onClick={(event) => event.stopPropagation()}>
+            <ShowForAdd selectedChat={selectedChat}/>
+            </div>
             </>) : ('')}
-            <ExitChat selectedChat={selectedChat} />
+            {selectedChat.room_user_type !== "new_chat" ? (<><ExitChat selectedChat={selectedChat}/></>): ("")}
           </div>
         </form>
       </div>
