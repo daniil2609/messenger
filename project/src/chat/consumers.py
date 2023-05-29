@@ -1,5 +1,6 @@
 # chat/consumers.py
 import json
+from . utils import encrypt
 from .models import Room, Message, Task
 from src.users.models import User
 from asgiref.sync import async_to_sync
@@ -58,46 +59,46 @@ class ChatConsumer(WebsocketConsumer):
         self.send_online_user_list()
 
 
-
     def disconnect(self, code):
-        settings.REDIS_CLIENT.srem(f'{self.room_name}_onlines', bytes(self.user.email, 'utf-8'))
-        self.send_online_user_list()
+        if self.user.is_authenticated:
+            settings.REDIS_CLIENT.srem(f'{self.room_name}_onlines', bytes(self.user.email, 'utf-8'))
+            self.send_online_user_list()
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
         )
 
     def receive(self, text_data):
-        #self.send_online_user_list()
         text_data_json = json.loads(text_data)
         message_type = text_data_json["type"]
         if message_type == "chat_message":
-            message_text = text_data_json['message']
-            message = Message.objects.create(
-                user=self.user,
-                room=self.room,
-                text=message_text,
-            )
-            message.read_users.add(self.user)
-            message.save()
-
-            async_to_sync(self.channel_layer.group_send)(
-                self.room_group_name,
-                {
-                    "type": "chat_message",
-                    "message": MessageSerializer(message).data,
-                },
-            )
-
-            async_to_sync(self.channel_layer.group_send)(
-                f'{self.room_name}_notifications',
-                {
-                    "type": "notification",
-                    "room": RoomSerializer(self.room).data,
-                    "message": MessageSerializer(message).data,
-                },
-            )
-            
+            text = text_data_json['message']
+            message_text = encrypt(text) #шифруем сообщение
+            if len(text)<=1024 and len(message_text)<=2048:#проверяем длину сообщения
+                message = Message.objects.create(
+                    user=self.user,
+                    room=self.room,
+                    text=message_text,
+                )
+                message.read_users.add(self.user)
+                message.save()
+                #отправляем сообщение всем участникам группы
+                async_to_sync(self.channel_layer.group_send)(
+                    self.room_group_name,
+                    {
+                        "type": "chat_message",
+                        "message": MessageSerializer(message).data,
+                    },
+                )
+                #отправляем сообщение всем участникам группы уведомлений
+                async_to_sync(self.channel_layer.group_send)(
+                    f'{self.room_name}_notifications',
+                    {
+                        "type": "notification",
+                        "room": RoomSerializer(self.room).data,
+                        "message": MessageSerializer(message).data,
+                    },
+                )
 
         if message_type == "paginate_up":
             end_id = text_data_json['up_id']
@@ -183,15 +184,13 @@ class NotificationConsumer(WebsocketConsumer):
             }))
 
 
-
-
 class KanbanBoardConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.room_name = None
         self.room_group_name = None
         self.room = None
-        self.board = None
+        self.all_board_task = None
 
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -207,14 +206,14 @@ class KanbanBoardConsumer(WebsocketConsumer):
         )
         self.accept()
         #получаем все задачи доски:
-        self.board = Task.objects.filter(owner=self.room)
+        self.all_board_task = Task.objects.filter(owner=self.room)
         self.send(text_data=json.dumps(
             {
                 "type": "board",
-                "ToDo": KanbanTaskSerializer(self.board.filter(board_name=1), many=True).data,
-                "InProgress": KanbanTaskSerializer(self.board.filter(board_name=2), many=True).data,
-                "Review": KanbanTaskSerializer(self.board.filter(board_name=3), many=True).data,
-                "Done": KanbanTaskSerializer(self.board.filter(board_name=4), many=True).data,
+                "ToDo": KanbanTaskSerializer(self.all_board_task.filter(board_name=1), many=True).data,
+                "InProgress": KanbanTaskSerializer(self.all_board_task.filter(board_name=2), many=True).data,
+                "Review": KanbanTaskSerializer(self.all_board_task.filter(board_name=3), many=True).data,
+                "Done": KanbanTaskSerializer(self.all_board_task.filter(board_name=4), many=True).data,
             }
         ))
 
@@ -242,13 +241,18 @@ class KanbanBoardConsumer(WebsocketConsumer):
                 name_board = 4
             else:
                 name_board = 1
-            Task.objects.create(
-                owner=self.room,
-                board_name=name_board,
-                name=name_task,
-                description=description_task
-            )
-            self.send_all_board()
+            encrypt_name_task = encrypt(name_task)#encrypt для шифрования
+            encrypt_description_task = encrypt(description_task)#encrypt для шифрования
+            if name_task != "" and len(name_task)<=128 and len(description_task)<=1024:
+                Task.objects.create(
+                    owner=self.room,
+                    board_name=name_board,
+                    name=encrypt_name_task,
+                    description=encrypt_description_task
+                )
+                self.send_all_board()
+            else:
+                self.send_error('You must specify the name of the task')
 
         if message_type == "delete":
             id_task = text_data_json['id_task']
@@ -259,11 +263,14 @@ class KanbanBoardConsumer(WebsocketConsumer):
             id_task = text_data_json['id_task']
             new_name_task = text_data_json['new_name_task']
             new_description_task = text_data_json['new_description_task']
-            if new_name_task != "":
-                Task.objects.filter(pk=id_task).update(name=new_name_task)
-            if new_description_task != "":
-                Task.objects.filter(pk=id_task).update(description=new_description_task)
-            self.send_all_board()
+            if new_description_task == "" and new_name_task == "":
+                self.send_error('To edit, you need at least one thing')
+            else:
+                if new_name_task != "":
+                    Task.objects.filter(pk=id_task).update(name=encrypt(new_name_task))#encrypt для шифрования
+                if new_description_task != "":
+                    Task.objects.filter(pk=id_task).update(description=encrypt(new_description_task))#encrypt для шифрования
+                self.send_all_board()
 
         if message_type == "move":
             id_task = text_data_json['id_task']
@@ -282,24 +289,24 @@ class KanbanBoardConsumer(WebsocketConsumer):
             self.send_all_board()
 
     def send_all_board(self):
-        self.board = Task.objects.filter(owner=self.room)
+        self.all_board_task = Task.objects.filter(owner=self.room)
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
                 "type": "board",
-                "ToDo": KanbanTaskSerializer(self.board.filter(board_name=1), many=True).data,
-                "InProgress": KanbanTaskSerializer(self.board.filter(board_name=2), many=True).data,
-                "Review": KanbanTaskSerializer(self.board.filter(board_name=3), many=True).data,
-                "Done": KanbanTaskSerializer(self.board.filter(board_name=4), many=True).data,
+                "ToDo": KanbanTaskSerializer(self.all_board_task.filter(board_name=1), many=True).data,
+                "InProgress": KanbanTaskSerializer(self.all_board_task.filter(board_name=2), many=True).data,
+                "Review": KanbanTaskSerializer(self.all_board_task.filter(board_name=3), many=True).data,
+                "Done": KanbanTaskSerializer(self.all_board_task.filter(board_name=4), many=True).data,
             },
         )
 
     def board(self, event):
+        self.send(text_data=json.dumps(event))
+    
+    def send_error(self, message):
         self.send(text_data=json.dumps({
-            'type': 'board',
-            'ToDo': event['ToDo'],
-            'InProgress': event['InProgress'],
-            'Review': event['Review'],
-            'Done': event['Done'],
+            'type': 'Kanban_error',
+            'message': message,
             }))
 

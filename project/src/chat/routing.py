@@ -7,5 +7,4 @@ websocket_urlpatterns = [
     re_path(r'ws/chat/board/(?P<room_name>\w+)/$', consumers.KanbanBoardConsumer.as_asgi()),
     re_path(r'ws/chat/notifications/$', consumers.NotificationConsumer.as_asgi()),
     
-
 ]

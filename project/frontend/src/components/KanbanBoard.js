@@ -24,6 +24,10 @@ export default function KanbanBoard(props) {
                     console.log(data.Done) 
                     console.log('Конец kanban:') 
                     break; 
+                case "Kanban_error":
+                    console.log('Начало ОШИБКИ kanban:') 
+                    console.log(data.message)
+                    console.log('Конец ОШИБКИ kanban:')
                 default: 
                     bash.error("Unknown message type!"); 
                     break; 
