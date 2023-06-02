@@ -220,6 +220,13 @@ CHANNEL_LAYERS = {
 
 REDIS_CLIENT = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
+
+#включить шифрование:
+ENABLEENCRYPTION = True
 #ключ для шифрования сообщений:
 ENCRYPT_KEY = b'C4oBLzKuQL1qa0Dj6-HtZhr42G7Dl4EmTPRjE3y0S50='
+
+
+#максимальное колеческтво участников общих чатов:
+MAX_NUMBER_PARTICIPANTS = 1000
 

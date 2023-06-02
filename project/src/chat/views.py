@@ -58,9 +58,12 @@ class EnterChatRoomView(APIView):
         id=request.data.get('id')
         room = get_object_or_404(Room, pk=id)
         if room.type == '2':
-            room.participant.add(request.user)
-            room.save()
-            return Response({"detail": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
+            if room.participant.count() <= settings.MAX_NUMBER_PARTICIPANTS:
+                room.participant.add(request.user)
+                room.save()
+                return Response({"detail": "Request accepted, user added to room"}, status.HTTP_201_CREATED)
+            else:
+                return Response({"detail": f"The maximum number of participants has been reached in the chat ({settings.MAX_NUMBER_PARTICIPANTS})"}, status.HTTP_403_FORBIDDEN)
         else:
             return Response({"detail": "You can only join public shared chats"}, status.HTTP_403_FORBIDDEN)
 
@@ -153,20 +156,28 @@ class AddUserInRoom(APIView):
         participant_list=request.data.get('participant')
         if id is not None:
             room = get_object_or_404(Room, pk=id)
+        #проверяем наличие комнаты
         if room is not None:
+            #проверяем что комната общая
             if room.type == '2' or room.type == '3':
-                my_user = User.objects.get(pk=request.user.pk)
-                if my_user in room.participant.all():
-                    add_users = []
-                    for user_id in participant_list:
-                        another_user = get_object_or_404(User, pk=user_id)
-                        if Friend.objects.are_friends(my_user, another_user):
-                            room.participant.add(another_user)
-                            room.save()
-                            add_users.append(another_user.pk)
-                    return Response({"detail": f"Users have been added: {add_users}"}, status.HTTP_201_CREATED)
+                #проверяем что не привысит максимальное количество участников
+                if room.participant.count() + len(participant_list) <= settings.MAX_NUMBER_PARTICIPANTS:
+                    my_user = User.objects.get(pk=request.user.pk)
+                    #проверяем что пользователь состоит в группе
+                    if my_user in room.participant.all():
+                        add_users = []
+                        for user_id in participant_list:
+                            another_user = get_object_or_404(User, pk=user_id)
+                            #проверяем что добавляемые пользователи в друзьях текущего
+                            if Friend.objects.are_friends(my_user, another_user):
+                                room.participant.add(another_user)
+                                room.save()
+                                add_users.append(another_user.pk)
+                        return Response({"detail": f"Users have been added: {add_users}"}, status.HTTP_201_CREATED)
+                    else:
+                        return Response({"detail": "Request rejected, you are not a member of this room"}, status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({"detail": "Request rejected, you are not a member of this room"}, status.HTTP_400_BAD_REQUEST)
+                    return Response({"detail": f"The maximum number of participants has been reached in the chat ({settings.MAX_NUMBER_PARTICIPANTS})"}, status.HTTP_403_FORBIDDEN)
             else:
                 return Response({"detail": "Request rejected, you can only add users to the common room"}, status.HTTP_400_BAD_REQUEST)
         else:
