@@ -24,7 +24,7 @@ const Putgoing = () => {
                 <HeaderPersonalPage />
                 <Link to="/personalpage/my_friends">Назад</Link>
                     <form className="form">
-                        <div className="form_group"> Нет исходящих запросов</div>
+                        <div className="form_group"> Нет входящих запросов</div>
                     </form>
                 </>
                 )}

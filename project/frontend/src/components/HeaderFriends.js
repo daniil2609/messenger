@@ -15,7 +15,7 @@ const HeaderFriends = () => {
         <>
         <form className="form" style={{height: '100px'}} >
           <div className="parent_button">
-            <button type="button" className="form_button" onClick={my_friends}>Мои друзья</button>
+            <button type="button" className="form_button" onClick={my_friends}>Мои контакты</button>
           </div>
           <div className="parent_button" style={{marginTop: '20px'}}>
             <button type="button" className="form_button" onClick={search_friends}>Найти друзей</button>

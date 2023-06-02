@@ -9,6 +9,19 @@ export default function OpenChat(props) {
     const [messageHistory, setMessageHistory] = useState([]); 
     const [message, setMessage] = useState(""); 
     const chatContainerRef = useRef(null);
+    const [isFront, setIsFront] = useState(true);
+    const [wordChange, setWordChange] = useState("Kanban");
+
+    const changeSide = () => {
+        if (wordChange === "Kanban") {
+            setWordChange("Чат")
+            setIsFront(!isFront)
+        } else if (wordChange === "Чат") {
+            setWordChange("Kanban")
+            setIsFront(true)
+        }
+        
+    }
 
     //для пагинации:
     const [upId, setUpId] = useState();
@@ -105,8 +118,10 @@ export default function OpenChat(props) {
 
     return ( 
         <>
-            <div className="parrent_title" style={{justifyContent:'space-between'}}> Соединение: {' ' + connectionStatus}
-                <KanbanBoard selectedChat={props.selectedChat}/>
+                    {isFront? (
+                        <>
+                            <div className="parrent_title" style={{justifyContent:'space-between'}}> Соединение: {' ' + connectionStatus}
+                <button type="button" onClick={changeSide} className="form_button"> {wordChange} </button>
                 <SettingsMenu selectedChat = {props.selectedChat} onlineUsers = {onlineUsers}/>
             </div>
             
@@ -144,7 +159,12 @@ export default function OpenChat(props) {
         </form>
         </div>
         </>)}
-            
+                        </>
+                    ):(
+                        <>
+                            <KanbanBoard selectedChat={props.selectedChat} changeSide={changeSide} wordChange={wordChange}/>
+                        </>
+                    )}
             </>
     ); 
 }

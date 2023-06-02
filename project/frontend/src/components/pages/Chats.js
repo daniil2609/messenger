@@ -31,7 +31,8 @@ const Chats = () => {
             const data = JSON.parse(e.data); 
             switch (data.type) { 
                 case "notification": 
-                    console.log('Начало уведомления:') 
+                    console.log('Начало уведомления:')
+                    console.log(user) 
                     console.log(data.message) 
                     console.log(data.room) 
                     console.log('Конец уведомления:') 
