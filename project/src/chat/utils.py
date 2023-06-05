@@ -17,7 +17,7 @@ def encrypt(txt):
             encrypted_text = base64.urlsafe_b64encode(encrypted_text).decode("utf-8") 
             return encrypted_text
         except:
-            return None
+            return ""
     else:
         return txt
 
@@ -31,7 +31,7 @@ def decrypt(txt):
             decoded_text = cipher_suite.decrypt(txt).decode("utf-8")   
             return decoded_text
         except:
-            return None
+            return ""
     else:
         return txt
 
