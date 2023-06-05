@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react"
 import { useNavigate, Link } from "react-router-dom" 
 import axios from "axios"
 import HeaderHomePage from "../HeaderHomepage"
+import ResponseModule from "../ResponseModule"
 
 const Authorization = () => {
     //создание formData с помощью хука Реакта - useState 
@@ -11,6 +12,9 @@ const Authorization = () => {
     });
 
     const navigate = useNavigate();
+
+    const [response_, setResponse] = useState(false)
+    const [text, setText] = useState("")
 
     const [csrfToken, setCsrfToken] = useState("");
     useEffect(() => {
@@ -41,20 +45,30 @@ const Authorization = () => {
                 },
                 withCredentials: true
             })
-            .then(responce => {
-                if (responce.data.detail = "Successfully logged in."){
+            .then(response => {
+                if (response.data.detail === "Successfully logged in."){
                     navigate("/personalpage/chats")
                 }
             })
-            .catch(function(error) {
-                if (error.message = "Request failed with status code 403"){
-                    console.log("Ошибка авторизации")
+            .catch(error => {
+                if (error.response.data.detail === "Please provide username and password."){
+                    setResponse(true)
+                    setText("Пожалуйста, укажите почту, пароль!")
+                }
+                else if (error.response.data.detail === 'Invalid credentials.'){
+                    setResponse(true)
+                    setText("Пожалуйста, проверьте введенные данные!")
+                }
+                else if (error.response.data.detail === 'Email not confirmed.'){
+                    setResponse(true)
+                    setText("Пожалуйста, подтвердите почту!")
                 }
             })
             }
     return (
         <>
         <HeaderHomePage/>
+        {response_ && <ResponseModule response_={response_} text={text} setResponse={setResponse}/>}
         <div className="moving">
             <form onSubmit={hadleSubmit} className="form">
             <div className="form_title">Авторизация</div>

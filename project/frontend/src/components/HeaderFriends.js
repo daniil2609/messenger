@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const HeaderFriends = () => {
+const HeaderFriends = ({setFriends}) => {
     const navigate = useNavigate();
 
     const my_friends = () => {
@@ -18,7 +18,7 @@ const HeaderFriends = () => {
             <button type="button" className="form_button" onClick={my_friends}>Мои контакты</button>
           </div>
           <div className="parent_button" style={{marginTop: '20px'}}>
-            <button type="button" className="form_button" onClick={search_friends}>Найти друзей</button>
+            <button type="button" className="form_button" onClick={search_friends}>Найти пользователей</button>
           </div>
         </form>
         </>

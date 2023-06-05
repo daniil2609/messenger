@@ -33,6 +33,11 @@ const ReqFriend = (props) =>{
                 withCredentials: true
             })
             console.log(response)
+            props.setFriend((prev)=>{
+                return prev.filter((elem)=> 
+                    elem.email !== emailD
+                )
+            });
         }
         catch (error) {
             console.error(error)

@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react"
 import axios from "axios"
 import HeaderHomePage from "../HeaderHomepage"
+import ResponseModule from "../ResponseModule"
 
 const Registration = () => {
     //создание formData с помощью хука Реакта - useState 
@@ -9,6 +10,10 @@ const Registration = () => {
         email: "",
         password: ""
     });
+
+
+    const [response_, setResponse] = useState(false)
+    const [text, setText] = useState("")
 
     const [csrfToken, setCsrfToken] = useState("");
     useEffect(() => {
@@ -40,13 +45,20 @@ const Registration = () => {
             },
             withCredentials: true
         })
-        .then(responce => {
-            alert("Подтвердите почту!")
-            console.log(responce.data.detail)
+        .then(response => {
+            if (response.data.detail === "Regestration successfully, confirm email"){
+                setResponse(true)
+                setText("Регистрация выполнилась успешно, необходимо подтвердить почту!")
+            }
         })
-        .catch(function(error) {
-            if (error.message = "Request failed with status code 403"){
-                console.log("Ошибка регистрации")
+        .catch(error => {
+            console.log(error.response.data)
+            if (error.response.data.detail === "User already exists") {
+                setResponse(true)
+                setText("Такой пользователь уже существует!")
+            } else if (error.response.data.detail === "Bad data regestration"){
+                setResponse(true)
+                setText("Пожалуйста, проверьте введенные данные!")
             }
         })
         }
@@ -54,6 +66,7 @@ const Registration = () => {
         return (
             <>
             <HeaderHomePage/>
+            {response_ && <ResponseModule response_={response_} text={text} setResponse={setResponse}/>}
             <div className="moving">
             <form onSubmit={hadleSubmit} className="form">
                 <div className="form_title">Регистрация</div>

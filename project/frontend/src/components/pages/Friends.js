@@ -29,7 +29,7 @@ const Friends = () => {
             <>
             <HeaderPersonalPage/>
             <div className="form-wrapper">
-            <HeaderFriends />
+            <HeaderFriends/>
             <form className="form" style={{height: '40px', textAlign: 'center'}}>
                     <div className="form_group" > Список друзей пуст</div>
                 </form>

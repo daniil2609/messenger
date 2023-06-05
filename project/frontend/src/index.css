@@ -242,7 +242,6 @@ header {
   width: 50%;
   text-align: center;
   padding: 5px 10px;
-  
   border: none;
   border-radius: 5px;
   color: #fff;
@@ -302,6 +301,20 @@ header {
 .dragged-element {
   opacity: 0.95;
 }
+
+.container_notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+.container_responses {
+  position: fixed;
+  margin-top: 10px;
+  right: 20px;
+}
+
+
 
 
 

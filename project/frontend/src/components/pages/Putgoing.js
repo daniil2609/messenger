@@ -39,8 +39,8 @@ const Putgoing = () => {
                             {friendData.from_user}
                             {friendData.id}
                         </div>
-                    <AddFriend friendData={friendData}/>
-                    <CancelFriend friendData={friendData}/>
+                    <AddFriend friendData={friendData} setFriend={setFriend}/>
+                    <CancelFriend friendData={friendData} setFriend={setFriend}/>
                 </form>
                     ))}
               </>

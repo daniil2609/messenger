@@ -36,7 +36,7 @@ const Rejected = () => {
                         <div className="form_group"> Пользователь:
                             {friendData.from_user}
                         </div>
-                    <AddFriend friendData={friendData}/>
+                    <AddFriend friendData={friendData} setFriend={setFriend}/>
                 </form>
                     ))}
               </>

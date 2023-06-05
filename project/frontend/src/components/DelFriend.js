@@ -48,7 +48,7 @@ const DelFriend = (props) =>{
     return(
         <>
         <div className="parent_button">
-            <button type="button" onClick={(e) => {delFriend(e, props.friendData.email)}} className="form_button">Удалить друга</button>
+            <button type="button" onClick={(e) => {delFriend(e, props.friendData.email)}} className="form_button">Удалить пользователя</button>
         </div>
         </>
     )

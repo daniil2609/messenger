@@ -30,7 +30,11 @@ const CancelFriend = (props) => {
                 },
                 withCredentials: true
             })
-            console.log(response)
+            props.setFriend((prev)=>{
+                return prev.filter((elem)=> 
+                    elem.id !== id_
+                )
+            });
         }
         catch (error) {
             console.error(error)

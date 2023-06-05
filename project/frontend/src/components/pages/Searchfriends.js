@@ -10,11 +10,6 @@ const SearchFriends = () => {
         message: ''
     })
 
-    const [reqfriend, setreqfriend] = useState({
-        to_user: '',
-        message: ''
-    })
-
     const [friend, setFriend] = useState([{}])
 
     const [searching, setSearching] = useState(false)
@@ -132,7 +127,7 @@ const SearchFriends = () => {
                 <div className="form_group"> Почта: 
                     {friendData.email}
                 </div>
-                <ReqFriend friendData={friendData}></ReqFriend>
+                <ReqFriend friendData={friendData} setFriend={setFriend}></ReqFriend>
         </form>
             ))}
         </div>
