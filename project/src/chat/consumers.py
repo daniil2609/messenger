@@ -12,6 +12,7 @@ from src.users.serializers import UserSerializer
 from django.conf import settings
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
+from datetime import datetime
 
 COUNT_PAGINATE = 5
 
@@ -206,7 +207,7 @@ class KanbanBoardConsumer(WebsocketConsumer):
         )
         self.accept()
         #получаем все задачи доски:
-        self.all_board_task = Task.objects.filter(owner=self.room)
+        self.all_board_task = Task.objects.filter(owner=self.room).order_by('-time_create')
         self.send(text_data=json.dumps(
             {
                 "type": "board",
@@ -266,10 +267,13 @@ class KanbanBoardConsumer(WebsocketConsumer):
             if new_description_task == "" and new_name_task == "":
                 self.send_error('To edit, you need at least one thing')
             else:
+                task = Task.objects.filter(pk=id_task).first()
                 if new_name_task != "":
-                    Task.objects.filter(pk=id_task).update(name=encrypt(new_name_task))#encrypt для шифрования
-                if new_description_task != "":
-                    Task.objects.filter(pk=id_task).update(description=encrypt(new_description_task))#encrypt для шифрования
+                    task.name = encrypt(new_name_task)#encrypt для шифрования
+                    if new_description_task != "":
+                        task.description = encrypt(new_description_task)#encrypt для шифрования
+                    task.time_create = datetime.now()
+                    task.save()
                 self.send_all_board()
 
         if message_type == "move":
@@ -285,11 +289,14 @@ class KanbanBoardConsumer(WebsocketConsumer):
                 name_board = 4
             else:
                 name_board = 1
-            Task.objects.filter(pk=id_task).update(board_name=name_board)
+            task = Task.objects.filter(pk=id_task).first()
+            task.board_name = name_board
+            task.time_create = datetime.now()
+            task.save()
             self.send_all_board()
 
     def send_all_board(self):
-        self.all_board_task = Task.objects.filter(owner=self.room)
+        self.all_board_task = Task.objects.filter(owner=self.room).order_by('-time_create')
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
