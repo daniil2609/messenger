@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import User
+from django.core import exceptions
+import django.contrib.auth.password_validation as validators
 
 class RegistrationAuth(serializers.ModelSerializer):
     """ Сериализация данных от Регистрации
@@ -13,6 +15,18 @@ class RegistrationAuth(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+    #валидация пароля:
+    def validate(self, data):
+         password = data.get('password')
+         errors = dict() 
+         try:
+             validators.validate_password(password=password, user=User)
+         except exceptions.ValidationError as e:
+             errors['password'] = list(e.messages)
+         if errors:
+             raise serializers.ValidationError(errors)
+         return super(RegistrationAuth, self).validate(data)
 
 class LoginAuth(serializers.ModelSerializer):
     """ Сериализация данных от Входа
