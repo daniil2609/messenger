@@ -215,6 +215,8 @@ ENABLEENCRYPTION = True
 ENCRYPT_KEY = b'C4oBLzKuQL1qa0Dj6-HtZhr42G7Dl4EmTPRjE3y0S50='
 
 
-#максимальное колеческтво участников общих чатов:
+#максимальное количество участников общих чатов:
 MAX_NUMBER_PARTICIPANTS = 1000
 
+#максимальное количество задач в чате
+MAX_TASK_COUNT = 50

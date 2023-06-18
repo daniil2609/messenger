@@ -229,31 +229,34 @@ class KanbanBoardConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message_type = text_data_json["type"]
         if message_type == "add":
-            type_task = text_data_json['type_task']
-            name_task = text_data_json['name_task']
-            description_task = text_data_json['description_task']
-            if type_task == "ToDo":
-                name_board = 1
-            elif type_task == "InProgress":
-                name_board = 2
-            elif type_task == "Review":
-                name_board = 3
-            elif type_task == "Done":
-                name_board = 4
+            if self.all_board_task.count() >= settings.MAX_TASK_COUNT:
+                self.send_error('Maximum number of tasks has been reached')
             else:
-                name_board = 1
-            encrypt_name_task = encrypt(name_task)#encrypt для шифрования
-            encrypt_description_task = encrypt(description_task)#encrypt для шифрования
-            if name_task != "" and len(name_task)<=128 and len(description_task)<=1024:
-                Task.objects.create(
-                    owner=self.room,
-                    board_name=name_board,
-                    name=encrypt_name_task,
-                    description=encrypt_description_task
-                )
-                self.send_all_board()
-            else:
-                self.send_error('You must specify the name of the task')
+                type_task = text_data_json['type_task']
+                name_task = text_data_json['name_task']
+                description_task = text_data_json['description_task']
+                if type_task == "ToDo":
+                    name_board = 1
+                elif type_task == "InProgress":
+                    name_board = 2
+                elif type_task == "Review":
+                    name_board = 3
+                elif type_task == "Done":
+                    name_board = 4
+                else:
+                    name_board = 1
+                encrypt_name_task = encrypt(name_task)#encrypt для шифрования
+                encrypt_description_task = encrypt(description_task)#encrypt для шифрования
+                if name_task != "" and len(name_task)<=128 and len(description_task)<=1024:
+                    Task.objects.create(
+                        owner=self.room,
+                        board_name=name_board,
+                        name=encrypt_name_task,
+                        description=encrypt_description_task
+                    )
+                    self.send_all_board()
+                else:
+                    self.send_error('You must specify the name of the task')
 
         if message_type == "delete":
             id_task = text_data_json['id_task']
