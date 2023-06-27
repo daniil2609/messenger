@@ -56,4 +56,15 @@ class RecoveryPasswordSerializer(serializers.Serializer):
     """ Сериализация нового пароля
     """
     password = serializers.CharField()
+    #валидация пароля:
+    def validate(self, data):
+         password = data.get('password')
+         errors = dict() 
+         try:
+             validators.validate_password(password=password, user=User)
+         except exceptions.ValidationError as e:
+             errors['password'] = list(e.messages)
+         if errors:
+             raise serializers.ValidationError(errors)
+         return super(RecoveryPasswordSerializer, self).validate(data)
 
